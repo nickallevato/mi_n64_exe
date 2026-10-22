@@ -17,6 +17,19 @@ func = "Game_LevelLoop"
 before_vram = 0x80048170
 text = "{ int mi_level_min_vis_per_frame(void); ctx->r3 = ADD32(ctx->r17, mi_level_min_vis_per_frame() - 1); }"
 
+# Smooth root motion at 60 fps (src/game/enhancements.cpp): walking moves characters one animation keyframe step at
+# a time, and at 60 fps many frames don't reach a new keyframe. At the common exit ($t1 = animation state, $t3 = out
+# vector, X/Z already stored), add the partial step for the fraction of a keyframe played.
+[[patches.hook]]
+func = "Anim_GetRootDelta"
+before_vram = 0x80005B7C
+text = "{ void mi_root_motion_begin(uint8_t*, uint32_t); mi_root_motion_begin(rdram, (uint32_t)ctx->r4); }"
+
+[[patches.hook]]
+func = "Anim_GetRootDelta"
+before_vram = 0x80005E64
+text = "{ void mi_root_motion_end(uint8_t*, uint32_t, uint32_t); mi_root_motion_end(rdram, (uint32_t)ctx->r9, (uint32_t)ctx->r11); }"
+
 # Mouse turning outside aim mode (src/game/mouse.cpp): applied to Ethan's yaw at the start of player control.
 [[patches.hook]]
 func = "Player_Control"

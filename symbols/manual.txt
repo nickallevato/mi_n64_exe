@@ -61,3 +61,15 @@ Input_GetStick = 0x8006E480;
 Camera_SniperControl = 0x80015048;
 // Script command handler: enters the special aim state (player flag 0x100000) and resets the aim variables.
 Player_EnterScriptedAim = 0x8003D844;
+// Moves an object for this frame (called from Object_UpdateAll): root motion from its model's animations
+// (Model_GetRootMotion), scripted velocity, riding a parent object (obj+0x60), then collision; writes obj+0x18..0x20.
+Object_UpdateMovement = 0x800007BC;
+// Model_GetRootMotion(model, out): root displacement of the model's animations this frame. Blends the deltas of the
+// animation states at model+0x68 and model+0x88 by the weight model+0x60/model+0x62, rotates by the owner's yaw.
+Model_GetRootMotion = 0x80005FCC;
+// Anim_GetRootDelta(state, out): root motion of one animation state between its previous keyframe (state+0x16) and
+// current keyframe (state+0x14), summing the per-keyframe steps (6 bytes: s16 dx, y, dz; 1/256 units) in the
+// animation's root track. State: +0x4 animation id, +0x7 flags (0x80 = just started), +0x8 speed (keyframes per
+// 30 Hz tick), +0xC time in keyframes. Animation table: D_800BA97C, 12 bytes per id (+0x2 keyframe count, +0x4 root
+// track).
+Anim_GetRootDelta = 0x80005B7C;

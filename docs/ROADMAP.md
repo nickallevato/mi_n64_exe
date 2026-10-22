@@ -45,6 +45,10 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       (func_8003D844); not reached in any tested level
 - [x] Smooth frame pacing: vsync (FIFO) instead of mailbox. Present intervals on a 59.98 Hz display: p1-p99
       14.9-18.3 ms (mailbox: 4.7-34.5 ms, 12 doubled frames in 17 s); hidden windows still run at 60 FPS
+- [x] Smooth walking at 60 FPS: root motion advances one animation keyframe step at a time (Anim_GetRootDelta), and
+      animations are authored for 30 Hz ticks, so at 60 FPS ~1 frame in 3 had no movement followed by a full step.
+      A hook adds the partial step for the fraction of a keyframe played (Ethan's step per frame: 13/0 alternating
+      -> smooth 7.6-8.4). Applies to every walking character, cutscenes included.
 - [ ] Low input lag (present-early mode is already on; vsync adds up to a frame, measure it)
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
 - [x] Runs well on Linux/GNOME/NVIDIA: native Wayland, mailbox presentation (no freeze when hidden), <1 s
