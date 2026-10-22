@@ -1,0 +1,12 @@
+// Hand-identified symbols. These take precedence over libultra.txt.
+// exceptasm.s internals (splat merges send_mesg + handle_CpU into one function)
+send_mesg = 0x8007A224;
+__osEnqueueThread = 0x8007A41C;
+__osPopThread = 0x8007A464;
+// renamed to avoid clashing with the C entry point
+game_main = 0x8000E090;
+// n64sym mis-matched this as __rmonPanic; it's a game-side `j self` halt loop
+game_halt = 0x800606C4;
+// libultra functions n64sym missed (identified by their callees)
+osContInit = 0x800793C0;
+viMgrMain = 0x8007E2B8;

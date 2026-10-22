@@ -1,1 +1,58 @@
-# mi_n64_exe
+# Mission: Impossible (N64) — static recompilation
+
+Recompiles Mission: Impossible (USA, sha1 `7546d5df1fc93fed8205a066f1333fd7dd50c1e1`)
+into C with [N64Recomp](https://github.com/N64Recomp/N64Recomp). There is no existing
+decomp of this game, so the function list is generated from a splat disassembly instead of an ELF.
+
+## ROM layout (main segment)
+
+| What | ROM | VRAM |
+|---|---|---|
+| entrypoint | `0x1000` | `0x80000400` |
+| `.text` (CPU code, 1697 funcs) | `0x1000`–`0x84A60` | `0x80000400`– |
+| rspboot microcode | `0x84A60`–`0x84C90` | |
+| data / rodata | `0x84C90`–`0x94440` | |
+| bss (`0x27A00`) | — | `0x80093840` |
+| assets (no Yay0/Yaz0/MIO0, no plain code found) | `0x94440`–`0xC00000` | |
+
+`game_main` is at `0x8000E090`.
+
+## Setup
+
+```sh
+# ROM (git-ignored)
+mkdir -p rom && cp "<path>/Mission Impossible (USA).z64" rom/
+
+# tools (git-ignored)
+git clone --recurse-submodules https://github.com/N64Recomp/N64Recomp.git tools/N64Recomp
+cmake -S tools/N64Recomp -B tools/N64Recomp/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build tools/N64Recomp/build
+git clone https://github.com/shygoo/n64sym.git tools/n64sym && make -C tools/n64sym
+python3 -m venv tools/venv && tools/venv/bin/pip install 'splat64[mips]'
+
+# disassemble
+cd split && ln -sf "../rom/Mission Impossible (USA).z64" baserom.z64 \
+  && ../tools/venv/bin/python -m splat split missionimpossible.yaml && cd ..
+
+# recompile
+scripts/recomp.sh
+```
+
+## Symbols
+
+- `symbols/libultra.txt` — libultra functions found by `n64sym -s`. n64sym reports
+  jal-discovered addresses with a `0x7` prefix for this ROM (bug: base `0x7FFFF400 & 0xF0000000`);
+  these were corrected to `0x8`. Internal `*_text_XXXX` labels and false positives were removed.
+- `symbols/manual.txt` — hand-identified names; overrides `libultra.txt`.
+
+Correct libultra names matter: N64Recomp skips/replaces functions by name
+(`src/symbol_lists.cpp`) so that N64ModernRuntime can provide its own implementations.
+
+## Next steps toward a running port
+
+1. Build a runtime project on [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime)
+   (librecomp + ultramodern) with [RT64](https://github.com/rt64/rt64) for graphics —
+   [Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp) is the reference.
+2. Identify the graphics/audio microcodes the game uses (RT64 needs a supported F3DEX variant;
+   the audio ucode needs RSPRecomp).
+3. Identify remaining unnamed libultra functions as runtime errors surface.

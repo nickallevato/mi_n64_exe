@@ -1,0 +1,16 @@
+rom/
+*.z64
+*.n64
+*.v64
+tools/
+build/
+RecompiledFuncs/
+# ROM-derived / generated
+split/asm/
+split/assets/
+split/baserom.z64
+split/*.d
+split/*.ld
+split/n64sym*.txt
+syms.toml
+*.log

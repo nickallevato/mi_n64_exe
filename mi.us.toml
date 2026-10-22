@@ -1,0 +1,11 @@
+# N64Recomp config for Mission: Impossible (USA)
+[input]
+entrypoint = 0x80000400
+symbols_file_path = "syms.toml"
+rom_file_path = "rom/Mission Impossible (USA).z64"
+output_func_path = "RecompiledFuncs"
+functions_per_output_file = 50
+
+[patches]
+stubs = []
+ignored = []
