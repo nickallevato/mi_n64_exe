@@ -55,7 +55,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
 - [x] Runs well on Linux/GNOME/NVIDIA: native Wayland, mailbox presentation (no freeze when hidden), <1 s
       startup, ~22% CPU, 3-minute random-input soak without issues, identical audio at 30/60 FPS
-- [ ] Linux packaging (Flatpak/AppImage) and Windows builds
+- [x] Linux release: AppImage and .tar.gz built in an Ubuntu 22.04 container (glibc 2.35, static libstdc++)
+      by scripts/release/build_linux.sh; v0.1.0
+- [ ] Windows build, Flatpak
 
 ## Phase 4: Mods
 - [x] Level groundwork: level table, Burp archives (raw DEFLATE), load sequence and geometry format decoded;

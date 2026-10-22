@@ -5,7 +5,7 @@
 **The 1998 N64 classic, running natively on PC.**
 60 FPS · widescreen at any resolution · keyboard & mouse · analog camera
 
-[Screenshots](#screenshots) · [Controls](#controls) · [Settings](#settings) · [Build](#building) · [Roadmap](docs/ROADMAP.md) · [How it works](#how-it-works)
+[Screenshots](#screenshots) · [Download](#download) · [Controls](#controls) · [Settings](#settings) · [Build](#building) · [Roadmap](docs/ROADMAP.md) · [How it works](#how-it-works)
 
 <a href="https://cdn.jsdelivr.net/gh/nickallevato/mi_n64_exe@main/docs/media/highlights.mp4"><img src="docs/media/gameplay.gif" alt="Ethan running on the train roof and through the embassy at 60 FPS" width="720"></a>
 
@@ -82,6 +82,12 @@ Rebind anything in the **Controls** tab of the settings menu (**Esc** on the key
 - **General > Developer Tools**: shows a **Debug** tab with **Start in Level** (skip the intro and menus and start in
   any level), **Unlock All Levels**, and **Load Data Overrides** (edited level data from the `overrides` folder next
   to your settings; see [docs/LEVELS.md](docs/LEVELS.md)).
+
+## Download
+
+Get the latest Linux build from [Releases](https://github.com/nickallevato/mi_n64_exe/releases): the **AppImage**
+(one file, `chmod +x` and run) or the **.tar.gz**. Built on Ubuntu 22.04, so it runs on most current distros; needs
+Vulkan. Pick your ROM in the launcher on first start.
 
 ## Building
 
@@ -198,6 +204,7 @@ N64ModernRuntime can provide its own implementations.
 - `scripts/stacks.py` prints the recompiled game threads' call stacks (gdb).
 - `scripts/find_spins.py` lists busy-wait loops that need yield hooks.
 - `scripts/gen_controls_map.py docs/controls.svg` redraws the controls map.
+- `scripts/release/build_linux.sh` builds the release (AppImage and .tar.gz) in an Ubuntu 22.04 container (Docker).
 - `MI_STATS=1` prints graphics tasks and VIs per second; `MI_WATCH=addr[:n],...` prints game RAM each second.
 - `MI_FRAMETIMES=file` logs a timestamp for every VI and every game frame submitted, for checking frame pacing.
 

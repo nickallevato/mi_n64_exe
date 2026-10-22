@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Mission: Impossible Recompiled
+Comment=Native PC port of Mission: Impossible (N64), built with N64Recomp
+Exec=MIRecompiled
+Icon=MIRecompiled
+Categories=Game;
+Terminal=false

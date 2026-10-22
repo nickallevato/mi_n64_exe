@@ -50,7 +50,7 @@ fi
 
 WAYLAND_DISPLAY="$display" DISPLAY= SDL_VIDEODRIVER=wayland MI_INPUT="$input_file" \
     MI_ROM="${MI_ROM:-$PWD/rom/Mission Impossible (USA).z64}" \
-    ./build/app/MIRecompiled > "$out_dir/game.log" 2>&1 &
+    "${CAPTURE_BIN:-./build/app/MIRecompiled}" > "$out_dir/game.log" 2>&1 &
 pid=$!
 
 for i in $(seq 1 "$count"); do

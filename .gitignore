@@ -16,3 +16,4 @@ syms.toml
 *.log
 rsp/
 __pycache__/
+dist/
