@@ -6,6 +6,10 @@
 //   MI_LEVEL=<stage name>[,<difficulty>]       e.g. "Train roof" (first match, case-insensitive), or
 //                                              "<mission name>/<stage name>", e.g. "Ice Storm/Subpen"
 //
+// Without MI_LEVEL, Debug > Start in Level (General > Developer Tools) picks the stage: at launch, and again when the
+// game returns to the title screen if the choice changed since the last warp (so finishing a mission still reaches
+// the title).
+//
 // How: a hook in Game_ThreadMain, right after boot init and before the first FrontEnd_Title, sets up the same state the
 // menus would with no save device (all save slots unused, so nothing is ever written to the EEPROM), the difficulty,
 // CurMission and CurStage, then calls Game_RunMission like Game_MissionSelect does. Until the stage starts, hooks in
@@ -19,6 +23,8 @@
 #include <vector>
 
 #include "recomp.h"
+#include "mi_config.h"
+#include "mi_game.h"
 
 extern "C" {
     void Game_RunMission(uint8_t* rdram, recomp_context* ctx);
@@ -116,13 +122,8 @@ namespace {
     bool warp_pending = false;
 }
 
-// Game_ThreadMain, after boot init, before the front end (and again each time the front end loop restarts).
-extern "C" void mi_level_warp(uint8_t* rdram, recomp_context* ctx) {
-    static bool done = false;
-    const char* spec = std::getenv("MI_LEVEL");
-    if (done || spec == nullptr || *spec == '\0') return;
-    done = true;
-
+// Parses MI_LEVEL into mission, stage and difficulty; logs and returns false if it's invalid.
+static bool parse_level_spec(uint8_t* rdram, const char* spec, int& mission, int& stage, int& difficulty) {
     std::vector<std::string> parts;
     std::string s = spec;
     for (size_t start = 0;;) {
@@ -132,7 +133,9 @@ extern "C" void mi_level_warp(uint8_t* rdram, recomp_context* ctx) {
         start = comma + 1;
     }
 
-    int mission = -1, stage = -1, difficulty = 0;
+    mission = -1;
+    stage = -1;
+    difficulty = 0;
     bool ok;
     if (int m; parse_int(parts[0], m)) {
         mission = m;
@@ -142,13 +145,18 @@ extern "C" void mi_level_warp(uint8_t* rdram, recomp_context* ctx) {
         ok = parts.size() <= 2 && (parts.size() < 2 || parse_int(parts[1], difficulty));
         if (ok && !find_by_name(rdram, parts[0], mission, stage)) {
             std::fprintf(stderr, "Level warp: no stage named \"%s\" (see scripts/levels/level_table.py); booting normally\n", parts[0].c_str());
-            return;
+            return false;
         }
     }
     if (!ok) {
         std::fprintf(stderr, "Level warp: can't parse MI_LEVEL=\"%s\" (expected <mission>,<stage>[,<difficulty>] or a stage name); booting normally\n", spec);
-        return;
+        return false;
     }
+    return true;
+}
+
+// Sets up the menus' state and plays the mission from the given stage; returns when the mission is over.
+static void warp_to(uint8_t* rdram, recomp_context* ctx, int mission, int stage, int difficulty) {
     int missions = mission_count(rdram);
     if (mission < 0 || mission >= missions) {
         std::fprintf(stderr, "Level warp: mission %d out of range (0-%d); booting normally\n", mission, missions - 1);
@@ -195,6 +203,55 @@ extern "C" void mi_level_warp(uint8_t* rdram, recomp_context* ctx) {
 
     ctx->r29 = sp;
     std::fprintf(stderr, "Level warp: mission over, continuing to the title screen\n");
+}
+
+// Debug > Unlock All Levels: set the unlocked flag (0x01) on every stage the mission menu can show, like the
+// GameShark level codes. Hidden stages (flags 0xE0: cutscenes, continuations, test levels) stay hidden.
+void mi::levels_on_vi() {
+    uint8_t* rdram = mi::game_rdram();
+    if (rdram == nullptr || !mi::get_unlock_all_levels()) {
+        return;
+    }
+    for (int m = 0; m < mission_count(rdram); m++) {
+        for (int s = 0; s < stage_count(rdram, m); s++) {
+            uint32_t flags = stage_list(rdram, m) + s * ENTRY_SIZE + 2;
+            uint8_t value = ram_u8(rdram, flags);
+            if ((value & 0xE0) == 0 && (value & 0x01) == 0) {
+                ram_w8(rdram, flags, value | 0x01);
+            }
+        }
+    }
+}
+
+// Game_ThreadMain, after boot init, before the front end (and again each time the front end loop restarts).
+extern "C" void mi_level_warp(uint8_t* rdram, recomp_context* ctx) {
+    static bool env_checked = false;
+    static bool warped = false;
+    static mi::LevelChoice last_choice{-1, -1};
+
+    if (!env_checked) {
+        env_checked = true;
+        const char* spec = std::getenv("MI_LEVEL");
+        if (spec != nullptr && *spec != '\0') {
+            int mission, stage, difficulty;
+            if (parse_level_spec(rdram, spec, mission, stage, difficulty)) {
+                warped = true;
+                warp_to(rdram, ctx, mission, stage, difficulty);
+            }
+            return;
+        }
+    }
+
+    mi::LevelChoice choice;
+    if (!mi::get_start_level(choice)) {
+        return;
+    }
+    if (warped && choice.mission == last_choice.mission && choice.stage == last_choice.stage) {
+        return;
+    }
+    warped = true;
+    last_choice = choice;
+    warp_to(rdram, ctx, choice.mission, choice.stage, 0);
 }
 
 // True while Game_RunMission should skip the mission intro, Mission_BriefingMenu and the in-level objectives screen.

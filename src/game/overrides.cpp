@@ -2,9 +2,9 @@
 // changing the ROM (the app rejects modified ROMs). Called from hooks at the end of Burp_LoadTo and Burp_Load
 // (mi.us.toml), after an entry has been decoded into RAM and before the game reads or relocates it.
 //
-// MI_OVERRIDE_DIR=dir: dir/rom_XXXXXXXX.bin replaces the entry whose data starts at ROM address XXXXXXXX (8 hex
-// digits, as listed by scripts/levels/burp.py). The file is the decoded entry in the N64's (big-endian) byte order and
-// must be the same size as the original for now.
+// MI_OVERRIDE_DIR=dir (or Debug > Load Data Overrides, which reads <app folder>/overrides): dir/rom_XXXXXXXX.bin
+// replaces the entry whose data starts at ROM address XXXXXXXX (8 hex digits, as listed by scripts/levels/burp.py).
+// The file is the decoded entry in the N64's (big-endian) byte order and must be the same size as the original for now.
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -14,11 +14,20 @@
 #include <unordered_map>
 #include <vector>
 
+#include "mi_config.h"
+
 namespace {
     std::unordered_map<uint32_t, std::vector<uint8_t>> load_overrides() {
         std::unordered_map<uint32_t, std::vector<uint8_t>> overrides;
-        const char* dir = std::getenv("MI_OVERRIDE_DIR");
-        if (dir == nullptr) {
+        std::string dir;
+        if (const char* env = std::getenv("MI_OVERRIDE_DIR")) {
+            dir = env;
+        }
+        else if (mi::get_load_overrides()) {
+            dir = mi::get_overrides_dir();
+            std::fprintf(stderr, "Override folder: %s\n", dir.c_str());
+        }
+        if (dir.empty()) {
             return overrides;
         }
         std::error_code ec;

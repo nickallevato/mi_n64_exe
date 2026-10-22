@@ -35,6 +35,82 @@ static void add_general_options(recomp::config::Config &config) {
         mi::configkeys::general::analog_camera,
         mi::AnalogCamera::Off
     );
+
+    static EnumOptionVector developer_tools_options = {
+        {mi::DeveloperTools::Off, "Off", "Off"},
+        {mi::DeveloperTools::On, "On", "On"},
+    };
+    config.add_enum_option(
+        mi::configkeys::general::developer_tools,
+        "Developer Tools",
+        "Shows the <recomp-color primary>Debug</recomp-color> tab: start straight in any level, unlock all levels and "
+        "load edited level data.",
+        developer_tools_options,
+        mi::DeveloperTools::Off
+    );
+}
+
+// Levels listed in the mission menu, in menu order (indices into the mission table D_8008AB28 and each mission's stage
+// list, as printed by scripts/levels/level_table.py; hidden test and cutscene stages are left out).
+struct StartLevel {
+    const char* key;
+    const char* name;
+    mi::LevelChoice choice;
+};
+
+static const std::vector<StartLevel> start_levels = {
+    {"ice_hit_lundkwist_base", "Ice Hit: Lundkwist Base", {0, 0}},
+    {"ice_hit_subpen", "Ice Hit: Subpen", {0, 1}},
+    {"noc_embassy_function", "Recover NOC List: Embassy Function", {1, 0}},
+    {"noc_warehouse", "Recover NOC List: Warehouse", {1, 1}},
+    {"noc_kgb_hq", "Recover NOC List: K.G.B. HQ", {1, 2}},
+    {"noc_security_hallway", "Recover NOC List: Security Hallway", {1, 3}},
+    {"noc_sewage_control", "Recover NOC List: Sewage Control", {1, 4}},
+    {"noc_escape", "Recover NOC List: Escape", {1, 5}},
+    {"noc_fire_alarm", "Recover NOC List: Fire Alarm", {1, 7}},
+    {"cia_interrogation", "CIA Escape: Interrogation", {2, 0}},
+    {"cia_rooftop", "CIA Escape: CIA Rooftop", {2, 4}},
+    {"cia_terminal_room", "CIA Escape: Terminal Room", {2, 6}},
+    {"cia_rooftop_escape", "CIA Escape: Rooftop Escape", {2, 8}},
+    {"mole_station", "Mole Hunt: Station", {3, 0}},
+    {"mole_train_car", "Mole Hunt: Train car", {3, 1}},
+    {"mole_train_roof", "Mole Hunt: Train roof", {3, 3}},
+    {"ice_storm_subpen", "Ice Storm: Subpen", {4, 0}},
+    {"ice_storm_tunnel", "Ice Storm: Tunnel", {4, 1}},
+    {"ice_storm_mainland", "Ice Storm: Mainland", {4, 3}},
+    {"ice_storm_gunboat", "Ice Storm: Gunboat", {4, 4}},
+};
+
+static void add_debug_options(recomp::config::Config &config) {
+    // Value 0 is Off; value i + 1 is start_levels[i].
+    static std::vector<recomp::config::ConfigOptionEnumOption> start_level_options = [] {
+        std::vector<recomp::config::ConfigOptionEnumOption> options = {{0u, "off", "Off"}};
+        for (size_t i = 0; i < start_levels.size(); i++) {
+            options.push_back({static_cast<uint32_t>(i + 1), start_levels[i].key, start_levels[i].name});
+        }
+        return options;
+    }();
+    config.add_enum_option(
+        mi::configkeys::debug::start_level,
+        "Start in Level",
+        "Skips the intro and menus and starts straight in this level, at launch and whenever the game gets back to the "
+        "title screen after you change it. The level's own opening still plays. Progress isn't saved.",
+        start_level_options,
+        0u
+    );
+    config.add_bool_option(
+        mi::configkeys::debug::unlock_all_levels,
+        "Unlock All Levels",
+        "Shows every level in the mission menu.",
+        false
+    );
+    config.add_bool_option(
+        mi::configkeys::debug::load_overrides,
+        "Load Data Overrides",
+        "Loads edited game data (<b>rom_XXXXXXXX.bin</b> files made by scripts/levels/level_mod.py) from the "
+        "<b>overrides</b> folder next to your settings. Takes effect at the next launch.",
+        false
+    );
 }
 
 static void add_graphics_options(recomp::config::Config &config) {
@@ -63,6 +139,42 @@ T get_graphics_config_enum_value(const std::string& option_id) {
 template <typename T = uint32_t>
 T get_general_config_enum_value(const std::string& option_id) {
     return static_cast<T>(std::get<uint32_t>(recompui::config::get_general_config().get_option_value(option_id)));
+}
+
+static bool developer_tools_enabled() {
+    return get_general_config_enum_value<mi::DeveloperTools>(mi::configkeys::general::developer_tools) == mi::DeveloperTools::On;
+}
+
+static bool debug_config_created = false;
+
+static recomp::config::Config& debug_config() {
+    return recompui::config::get_config(mi::configkeys::debug::id);
+}
+
+bool mi::get_start_level(mi::LevelChoice& out) {
+    if (!debug_config_created || !developer_tools_enabled()) {
+        return false;
+    }
+    uint32_t value = std::get<uint32_t>(debug_config().get_option_value(mi::configkeys::debug::start_level));
+    if (value == 0 || value > start_levels.size()) {
+        return false;
+    }
+    out = start_levels[value - 1].choice;
+    return true;
+}
+
+bool mi::get_unlock_all_levels() {
+    return debug_config_created && developer_tools_enabled() &&
+        std::get<bool>(debug_config().get_option_value(mi::configkeys::debug::unlock_all_levels));
+}
+
+bool mi::get_load_overrides() {
+    return debug_config_created && developer_tools_enabled() &&
+        std::get<bool>(debug_config().get_option_value(mi::configkeys::debug::load_overrides));
+}
+
+std::string mi::get_overrides_dir() {
+    return (recompui::file::get_app_folder_path() / "overrides").string();
 }
 
 bool mi::get_analog_camera_enabled() {
@@ -147,6 +259,17 @@ void mi::init_config() {
     recompui::config::create_controls_tab();
     recompui::config::create_sound_tab();
     recompui::config::create_mods_tab();
+    // Creating a tab can move the other tabs' configs, so look configs up by id after this point.
+    add_debug_options(recompui::config::create_config_tab("Debug", mi::configkeys::debug::id, false));
     recompui::config::finalize();
+    debug_config_created = true;
     apply_mouse_default();
+
+    // The Debug tab only shows while General > Developer Tools is on.
+    recompui::config::set_tab_visible(mi::configkeys::debug::id, developer_tools_enabled());
+    recompui::config::get_general_config().add_option_change_callback(mi::configkeys::general::developer_tools,
+        [](recomp::config::ConfigValueVariant cur_value, recomp::config::ConfigValueVariant, recomp::config::OptionChangeContext) {
+            recompui::config::set_tab_visible(mi::configkeys::debug::id,
+                static_cast<mi::DeveloperTools>(std::get<uint32_t>(cur_value)) == mi::DeveloperTools::On);
+        });
 }

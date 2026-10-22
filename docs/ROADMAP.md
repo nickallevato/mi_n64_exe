@@ -64,6 +64,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       edits verified in game (recoloured and taller Embassy)
 - [ ] Level geometry encoder (edited mesh -> cells, k-d trees, display lists) and different-size overrides
 - [ ] Collision, prop (.DOF) models and the SOOL level script format
+- [x] Developer tools: General > Developer Tools shows a Debug tab (Start in Level, Unlock All Levels, Load Data
+      Overrides); MI_LEVEL and MI_OVERRIDE_DIR do the same from the command line
 - [ ] Patches pipeline: `patches/` C compiled for MIPS, recompiled with `patches.toml` (like Banjo's PatchesLib)
 - [ ] Export the symbol file for mod authors (`RecompModTool`, a `.nrm` template)
 - [ ] Texture packs (`.rtz`, RT64 replacement)

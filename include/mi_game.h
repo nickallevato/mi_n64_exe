@@ -19,6 +19,8 @@ namespace mi {
     void mouse_adjust_stick(float* x, float* y);
     // Game RAM, once the renderer has been created (nullptr before).
     uint8_t* game_rdram();
+    // Every VI: Debug > Unlock All Levels (src/game/level_warp.cpp).
+    void levels_on_vi();
 }
 
 #endif

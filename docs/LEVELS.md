@@ -72,6 +72,14 @@ logos and title screen. Continuation stages (flags 0x20/0x40) load and play on t
 previous part would have set up (not checked in detail); a scene (0x80) plays and then the mission continues with the
 next stage. An invalid value is logged and the game boots normally.
 
+### Debug tab
+
+**General > Developer Tools** shows a **Debug** tab with the same tools for players and modders, no command line
+needed: **Start in Level** (any of the 20 menu levels; applies at launch, and when the game returns to the title if
+the choice changed), **Unlock All Levels** (sets the unlocked flag on every menu stage each frame) and **Load Data
+Overrides** (reads `rom_XXXXXXXX.bin` files from the `overrides` folder in the app's config folder,
+`~/.config/MIRecompiled/overrides` on Linux). `MI_LEVEL` and `MI_OVERRIDE_DIR` take precedence.
+
 ## Toward a level mod
 
 What works: decoding every archive, exporting any level's geometry with textures, knowing where each level's blocks
