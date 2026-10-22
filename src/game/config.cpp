@@ -1,7 +1,11 @@
 #include <filesystem>
 
+#include <fstream>
+
 #include "recompui/config.h"
+#include "recompinput/input_mapping.h"
 #include "util/file.h"
+#include "json/json.hpp"
 
 #include "mi_config.h"
 
@@ -32,19 +36,67 @@ mi::FrameRate mi::get_frame_rate() {
     return get_graphics_config_enum_value<mi::FrameRate>(mi::configkeys::graphics::frame_rate);
 }
 
+// Keyboard + mouse defaults (only used until the player saves their own bindings).
+static void set_control_defaults() {
+    using namespace recompinput;
+    auto mouse = [](uint8_t button) { return InputField{ InputType::Mouse, button }; };
+    set_default_mapping_for_keyboard(GameInput::Z, { mouse(SDL_BUTTON_LEFT), InputField::keyboard(SDL_SCANCODE_Q) });
+    set_default_mapping_for_keyboard(GameInput::R, { mouse(SDL_BUTTON_RIGHT), InputField::keyboard(SDL_SCANCODE_E) });
+    set_default_mapping_for_keyboard(GameInput::C_DOWN, { InputField::keyboard(SDL_SCANCODE_LCTRL), InputField::keyboard(SDL_SCANCODE_DOWN) });
+}
+
+static void set_control_descriptions() {
+    using namespace recompinput;
+    set_game_input_description(GameInput::Z, "Shoot or punch.");
+    set_game_input_description(GameInput::R, "Hold for first-person view and aiming. The mouse aims while it's held.");
+    set_game_input_description(GameInput::A, "Action (open doors, push switches, read messages). Jumps by default.");
+    set_game_input_description(GameInput::B, "Inventory: cycle weapons.");
+    set_game_input_description(GameInput::L, "Switch camera mode.");
+    set_game_input_description(GameInput::C_UP, "While aiming: zoom.");
+    set_game_input_description(GameInput::C_DOWN, "Crouch / stand up. Also opens the item inventory.");
+    set_game_input_description(GameInput::C_LEFT, "While aiming: sidestep left.");
+    set_game_input_description(GameInput::C_RIGHT, "While aiming: sidestep right.");
+    set_game_input_description(GameInput::DPAD_LEFT, "Rotate the camera around Ethan.");
+    set_game_input_description(GameInput::DPAD_RIGHT, "Rotate the camera around Ethan.");
+    set_game_input_description(GameInput::START, "Pause and open the IMF menu.");
+}
+
+// RecompFrontend's mouse sensitivity defaults to 0 (mouse aiming off) outside the Steam Deck. Turn it on for new
+// installs by giving it a default when the saved general config doesn't have a value yet.
+static void apply_mouse_default() {
+    std::ifstream file{ recompui::file::get_app_folder_path() / "general.json" };
+    nlohmann::json saved = nlohmann::json::object();
+    if (file.good()) {
+        try {
+            file >> saved;
+        }
+        catch (...) {
+            saved = nlohmann::json::object();
+        }
+    }
+    if (!saved.contains(recompui::config::general::options::mouse_sensitivity)) {
+        recompui::config::get_general_config().set_option_value(recompui::config::general::options::mouse_sensitivity, 50.0);
+    }
+}
+
 void mi::init_config() {
     std::filesystem::path recomp_dir = recompui::file::get_app_folder_path();
     if (!recomp_dir.empty()) {
         std::filesystem::create_directories(recomp_dir);
     }
 
-    recompui::config::create_general_tab(recompui::config::GeneralTabOptions{});
+    recompui::config::GeneralTabOptions general_options{};
+    general_options.has_mouse_sensitivity = true;
+    recompui::config::create_general_tab(general_options);
 
     auto &graphics_config = recompui::config::create_graphics_tab();
     add_graphics_options(graphics_config);
 
+    set_control_defaults();
+    set_control_descriptions();
     recompui::config::create_controls_tab();
     recompui::config::create_sound_tab();
     recompui::config::create_mods_tab();
     recompui::config::finalize();
+    apply_mouse_default();
 }

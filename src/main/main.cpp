@@ -139,17 +139,19 @@ ultramodern::input::connected_device_info_t get_connected_device_info(int contro
 
 // Development/testing input injection: when MI_INPUT names a file, its contents are added to controller 1's
 // input on every poll. The file holds whitespace-separated N64 button names (A B Z START L R DU DD DL DR CU CD
-// CL CR) and optional stick values (x=-1..1 y=-1..1). Empty the file to release everything.
+// CL CR), optional stick values (x=-1..1 y=-1..1) and mouse motion per poll (mx=, my=). Empty the file to
+// release everything.
 bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
     bool ret = recompinput::profiles::get_n64_input(controller_num, buttons, x, y);
-
-    static const char* input_path = std::getenv("MI_INPUT");
-    if (input_path == nullptr || controller_num != 0) {
+    if (controller_num != 0) {
         return ret;
     }
 
-    FILE* f = std::fopen(input_path, "r");
+    static const char* input_path = std::getenv("MI_INPUT");
+    FILE* f = input_path != nullptr ? std::fopen(input_path, "r") : nullptr;
     if (f == nullptr) {
+        mi::mouse_on_poll(0.0f, 0.0f);
+        mi::mouse_adjust_stick(x, y);
         return ret;
     }
 
@@ -159,9 +161,16 @@ bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
         {"L", 0x0020}, {"R", 0x0010}, {"CU", 0x0008}, {"CD", 0x0004}, {"CL", 0x0002}, {"CR", 0x0001},
     };
     char token[32];
+    float mouse_dx = 0.0f, mouse_dy = 0.0f;
     while (std::fscanf(f, "%31s", token) == 1) {
         float value;
-        if (std::sscanf(token, "x=%f", &value) == 1) {
+        if (std::sscanf(token, "mx=%f", &value) == 1) {
+            mouse_dx = value;
+        }
+        else if (std::sscanf(token, "my=%f", &value) == 1) {
+            mouse_dy = value;
+        }
+        else if (std::sscanf(token, "x=%f", &value) == 1) {
             *x = value;
         }
         else if (std::sscanf(token, "y=%f", &value) == 1) {
@@ -176,6 +185,8 @@ bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
         }
     }
     std::fclose(f);
+    mi::mouse_on_poll(mouse_dx, mouse_dy);
+    mi::mouse_adjust_stick(x, y);
     return true;
 }
 

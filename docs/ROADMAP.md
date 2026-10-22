@@ -26,7 +26,10 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       speed is unchanged (verified by comparing 30/60 FPS runs). Graphics > Frame Rate, default 60.
 - [ ] Widescreen / ultrawide (RT64 aspect ratio plus patches for HUD and culling)
 - [ ] Dual analog camera
-- [ ] Gyro / mouse aim (the game has first-person aiming)
+- [x] Keyboard + mouse: WASD move, mouse turns Ethan directly (writes his yaw), right mouse = R (first-person view,
+      mouse moves the crosshair), left mouse = Z (shoot), Space = A, Shift = B, Ctrl = crouch. Cursor is captured in
+      game; General > Mouse Sensitivity (default 50%).
+- [ ] Mouse in the 0x100000 aim mode (Player_AimControl; hooked but not yet reached in testing)
 - [ ] Low input lag (present-early mode is already on)
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
 - [ ] Linux packaging (Flatpak/AppImage) and Windows builds

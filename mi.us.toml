@@ -17,6 +17,24 @@ func = "Game_LevelLoop"
 before_vram = 0x80048170
 text = "{ int mi_level_min_vis_per_frame(void); ctx->r3 = ADD32(ctx->r17, mi_level_min_vis_per_frame() - 1); }"
 
+# Mouse turning outside aim mode (src/game/mouse.cpp): applied to Ethan's yaw at the start of player control.
+[[patches.hook]]
+func = "Player_Control"
+before_vram = 0x8003EC10
+text = "{ void mi_mouse_player_control(uint8_t* rdram); mi_mouse_player_control(rdram); }"
+
+# Mouse aiming (src/game/mouse.cpp). In the aim handler, $f8 holds Ethan's body yaw in radians just before it's
+# converted to degrees and stored, and $f22 holds the aim pitch in radians just before it's stored.
+[[patches.hook]]
+func = "Player_AimControl"
+before_vram = 0x8003E384
+text = "{ float mi_mouse_take_aim_yaw(void); ctx->f8.fl += mi_mouse_take_aim_yaw(); }"
+
+[[patches.hook]]
+func = "Player_AimControl"
+before_vram = 0x8003E60C
+text = "{ float mi_mouse_apply_aim_pitch(float); ctx->f22.fl = mi_mouse_apply_aim_pitch(ctx->f22.fl); }"
+
 # Busy-wait loops. On hardware, interrupt-driven higher-priority threads preempt these loops; ultramodern
 # schedules game threads cooperatively, so each loop must yield while it's still waiting or it deadlocks.
 # Each hook runs right before the loop's branch and only yields when the branch is about to loop again.

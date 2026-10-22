@@ -45,3 +45,15 @@ Input_GetButtons = 0x8006E530;
 Game_LevelLoop = 0x80047CF8;
 // Returns the retrace counter D_800A1F3C (139 callers use it as a clock).
 Sched_GetRetraceCount = 0x8006C364;
+// Player control state machine: reads the stick (func_8006E5CC) and dispatches on the player state flags in
+// D_80093EF4; flag 0x100000 = aiming (Player_AimControl).
+Player_Control = 0x8003EC10;
+// Aiming with R held: stick X turns the aim (small offset D_80093EB8, overflow rotates Ethan's body yaw, stored as
+// degrees into (*D_80093D58)->yaw at +0x44), stick Y changes the pitch D_80093D9C (radians, +-85 degrees).
+Player_AimControl = 0x8003DEE4;
+// Object_SetYaw(obj, degrees): normalizes into obj+0x44, rebuilds the object matrix, recurses to a child.
+Object_SetYaw = 0x80003B8C;
+// Per-frame object update: integrates turn rate (obj+0x40, degrees per VI) by VIs elapsed since obj+0x6C.
+Object_UpdateAll = 0x800020E8;
+// Reads controller pad stick into s8 x/y (clamped to +-80).
+Input_GetStick = 0x8006E480;

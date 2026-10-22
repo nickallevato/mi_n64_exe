@@ -5,7 +5,8 @@
 # Each optional input (N64 buttons/stick for MI_INPUT, e.g. START or "A x=1") is held for 1 s after the
 # corresponding shot, so `capture.sh out 5 4 START` presses Start after the first screenshot. Use "" to skip.
 # Extra env vars (MI_STATS, MI_WATCH, ...) pass through to the game. CAPTURE_EXEC="cmd" runs a command (e.g.
-# scripts/stacks.py) right after shot CAPTURE_EXEC_AT (default: the last shot). Requires sway and grim.
+# scripts/stacks.py) right after shot CAPTURE_EXEC_AT (default: the last shot), with CAPTURE_DIR and
+# CAPTURE_WAYLAND_DISPLAY (for grim) set. Requires sway and grim.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -57,7 +58,7 @@ for i in $(seq 1 "$count"); do
     kill -0 "$pid" 2>/dev/null || { echo "game exited early"; break; }
     WAYLAND_DISPLAY="$display" grim "$out_dir/shot_$i.png" 2>/dev/null
     if [[ -n "${CAPTURE_EXEC:-}" && "$i" == "${CAPTURE_EXEC_AT:-$count}" ]]; then
-        bash -c "$CAPTURE_EXEC"
+        CAPTURE_WAYLAND_DISPLAY="$display" CAPTURE_DIR="$out_dir" bash -c "$CAPTURE_EXEC"
     fi
     input=${inputs[$((i - 1))]:-}
     if [[ -n "$input" ]]; then

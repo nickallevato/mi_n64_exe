@@ -13,6 +13,11 @@ namespace mi {
     void stats_on_vi();
     void stats_on_audio(size_t sample_count);
     void stats_set_rdram(uint8_t* rdram);
+    void mouse_on_poll(float test_dx, float test_dy);
+    // Adjusts controller 1's stick for mouse input that the game only accepts through the stick.
+    void mouse_adjust_stick(float* x, float* y);
+    // Game RAM, once the renderer has been created (nullptr before).
+    uint8_t* game_rdram();
 }
 
 #endif

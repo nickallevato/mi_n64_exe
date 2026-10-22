@@ -24,6 +24,10 @@ void mi::stats_set_rdram(uint8_t* rdram) {
     stats_rdram = rdram;
 }
 
+uint8_t* mi::game_rdram() {
+    return stats_rdram;
+}
+
 // Reads a 32-bit word of game RAM (rdram stores words in native byte order). Returns false if out of range.
 static bool read_word(uint32_t addr, uint32_t& out) {
     uint32_t offset = addr - 0x80000000u;
