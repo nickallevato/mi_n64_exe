@@ -5,7 +5,9 @@
 **The 1998 N64 classic, running natively on PC.**
 60 FPS · widescreen at any resolution · keyboard & mouse · analog camera
 
-[Controls](#controls) · [Settings](#settings) · [Build](#building) · [Roadmap](docs/ROADMAP.md) · [How it works](#how-it-works)
+[Screenshots](#screenshots) · [Controls](#controls) · [Settings](#settings) · [Build](#building) · [Roadmap](docs/ROADMAP.md) · [How it works](#how-it-works)
+
+<img src="docs/media/gameplay.gif" alt="Ethan running on the train roof and through the embassy at 60 FPS" width="720">
 
 </div>
 
@@ -18,7 +20,7 @@ and run on [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime), wi
 The app is built like [BanjoRecomp](https://github.com/BanjoRecomp/BanjoRecomp), on
 [RecompFrontend](https://github.com/N64Recomp/RecompFrontend).
 
-> **You need your own ROM.** No game data is in this repository. Use a dump of *Mission Impossible (USA)*,
+> **You need your own ROM.** No ROM or game data is in this repository, only screenshots. Use a dump of *Mission Impossible (USA)*,
 > sha1 `7546d5df1fc93fed8205a066f1333fd7dd50c1e1`.
 
 ## Features
@@ -31,6 +33,16 @@ The app is built like [BanjoRecomp](https://github.com/BanjoRecomp/BanjoRecomp),
 | 🖥️ **High resolution & widescreen** | Renders at your window's resolution with MSAA, widescreen expansion and a HUD that stays in place. |
 | 🐧 **Native Linux** | Native Wayland, starts in under a second, keeps running when the window is hidden. |
 | 🎮 **All 20 levels** | Every level loads and plays at 60 FPS. |
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Embassy Function: the ballroom](docs/media/embassy_ballroom.jpg) | ![Embassy Function: a guard in the hallway](docs/media/embassy_guard.jpg) |
+| ![CIA Rooftop](docs/media/cia_rooftop.jpg) | ![Train Roof](docs/media/train_roof.jpg) |
+| ![Lundkwist Base: the opening](docs/media/icehit_truck.jpg) | ![Subpen](docs/media/subpen.jpg) |
+
+1080p, widescreen, captured from the recomp.
 
 ## Controls
 
@@ -205,4 +217,5 @@ You did the hard, original part. The grunt work of applying it game by game is o
 functions, chasing busy-wait loops, wiring up mouse aim. We'll burn our own subscription and inference on it so you
 don't have to spend your weekends on it. You're welcome. Fork it, borrow from it, or ignore it.
 
-*Mission: Impossible* is © its respective owners. This project contains no game assets.
+*Mission: Impossible* is © its respective owners. This project contains no ROM data or game assets; the screenshots
+show the game running in this recomp.
