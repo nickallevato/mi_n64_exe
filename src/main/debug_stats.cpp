@@ -1,0 +1,92 @@
+// Development stats, printed once per second:
+//   MI_STATS=1   graphics tasks the game submitted and VIs (retraces) the runtime generated.
+//   MI_WATCH=... game RAM words, as comma-separated "ADDR[:COUNT]" (hex). "*ADDR+OFF" reads the pointer at ADDR
+//                and adds OFF, e.g. "*0x8009FE38+0x6C:4" for 4 words starting at a struct field.
+#include <atomic>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+
+#include "mi_game.h"
+
+static const bool stats_enabled = std::getenv("MI_STATS") != nullptr;
+static std::atomic<uint32_t> gfx_tasks{0};
+static std::atomic<uint32_t> vis{0};
+static const char* watch_spec = std::getenv("MI_WATCH");
+static uint8_t* stats_rdram = nullptr;
+
+void mi::stats_set_rdram(uint8_t* rdram) {
+    stats_rdram = rdram;
+}
+
+// Reads a 32-bit word of game RAM (rdram stores words in native byte order). Returns false if out of range.
+static bool read_word(uint32_t addr, uint32_t& out) {
+    uint32_t offset = addr - 0x80000000u;
+    if (stats_rdram == nullptr || offset >= 0x800000u || (offset & 3) != 0) {
+        return false;
+    }
+    out = *reinterpret_cast<uint32_t*>(stats_rdram + offset);
+    return true;
+}
+
+static void print_watches() {
+    std::string spec = watch_spec;
+    size_t start = 0;
+    while (start < spec.size()) {
+        size_t end = spec.find(',', start);
+        std::string item = spec.substr(start, end == std::string::npos ? std::string::npos : end - start);
+        start = end == std::string::npos ? spec.size() : end + 1;
+
+        uint32_t count = 1;
+        size_t colon = item.find(':');
+        if (colon != std::string::npos) {
+            count = std::strtoul(item.c_str() + colon + 1, nullptr, 0);
+            item.resize(colon);
+        }
+        uint32_t addr;
+        if (item[0] == '*') {
+            size_t plus = item.find('+');
+            uint32_t ptr;
+            if (!read_word(std::strtoul(item.c_str() + 1, nullptr, 0), ptr)) {
+                continue;
+            }
+            addr = ptr + (plus == std::string::npos ? 0 : std::strtoul(item.c_str() + plus + 1, nullptr, 0));
+        }
+        else {
+            addr = std::strtoul(item.c_str(), nullptr, 0);
+        }
+        fprintf(stderr, "[watch] %08X:", addr);
+        for (uint32_t i = 0; i < count; i++) {
+            uint32_t value;
+            if (read_word(addr + i * 4, value)) {
+                fprintf(stderr, " %08X", value);
+            }
+        }
+        fprintf(stderr, "\n");
+    }
+}
+
+// Called from a recompiler hook at the start of the game's gfx task submit function (see mi.us.toml).
+extern "C" void mi_stats_gfx_submit() {
+    gfx_tasks++;
+}
+
+void mi::stats_on_vi() {
+    if (!stats_enabled && watch_spec == nullptr) {
+        return;
+    }
+    vis++;
+    static auto last = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    if (now - last >= std::chrono::seconds(1)) {
+        last = now;
+        if (stats_enabled) {
+            fprintf(stderr, "[stats] gfx tasks/s: %u  VIs/s: %u\n", gfx_tasks.exchange(0), vis.exchange(0));
+        }
+        if (watch_spec != nullptr) {
+            print_watches();
+        }
+    }
+}

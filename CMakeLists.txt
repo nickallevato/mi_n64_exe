@@ -27,6 +27,12 @@ add_compile_definitions(
     __PRFCHWINTRIN_H
 )
 
+# ROM file picker: use the XDG desktop portal (D-Bus) instead of GTK for nativefiledialog-extended. Initializing GTK
+# in-process can stall startup for many seconds and delays SDL's audio thread setup.
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(NFD_PORTAL ON CACHE BOOL "nfd: use xdg-desktop-portal instead of GTK" FORCE)
+endif()
+
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
 
 set(BUILD_SHARED_LIBS OFF)
@@ -63,6 +69,7 @@ add_executable(MIRecompiled)
 set(SOURCES
     ${CMAKE_SOURCE_DIR}/src/main/main.cpp
     ${CMAKE_SOURCE_DIR}/src/main/register_overlays.cpp
+    ${CMAKE_SOURCE_DIR}/src/main/debug_stats.cpp
 
 
     ${CMAKE_SOURCE_DIR}/rsp/n_aspMain.cpp
@@ -154,6 +161,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     find_package(Threads REQUIRED)
 
     target_link_libraries(MIRecompiled PRIVATE "-latomic -static-libstdc++" ${CMAKE_DL_LIBS} Threads::Threads)
+
+    # Export symbols so the crash handler's backtraces show function names.
+    target_link_options(MIRecompiled PRIVATE -rdynamic)
 endif()
 
 # TODO fix the rt64 CMake script so that this doesn't need to be duplicated here

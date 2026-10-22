@@ -53,15 +53,24 @@ cmake --build build/app
 MI_ROM="rom/Mission Impossible (USA).z64" build/app/MIRecompiled   # MI_ROM auto-boots; omit to use the launcher
 ```
 
-Dev tools: `scripts/capture.sh` (launch + screenshots + key presses), `scripts/stacks.py` (game thread
-stacks via gdb).
+Dev tools:
+- `scripts/capture.sh` runs the game in a headless sway compositor (real GPU, invisible), takes screenshots with
+  grim and injects controller input through `MI_INPUT`.
+- `scripts/stacks.py` prints the recompiled game threads' call stacks (gdb).
+- `scripts/find_spins.py` lists busy-wait loops that need yield hooks.
+- `MI_STATS=1` prints graphics tasks and VIs per second; `MI_WATCH=addr[:n],...` prints game RAM each second.
 
 ## Runtime fixes
 
 - **Busy-wait loops** (`[[patches.hook]]` in `mi.us.toml`): the game spins on globals that interrupt-driven
   threads update. ultramodern schedules game threads cooperatively, so those loops get a yield hook.
-- The graphics thread blocks on presentation while the window is hidden (the compositor throttles it to
-  ~1 fps), which slows the game to match. Keep the window visible when testing.
+- **libultra functions n64sym missed** are named in `symbols/manual.txt` so the runtime replaces them (AI, SI,
+  EEPROM long read, ...). An unreplaced libultra function that waits on hardware hangs or crashes.
+- **Wayland**: on a Wayland session the app uses native Wayland. Through XWayland, NVIDIA's Vulkan presentation
+  stalls (the game runs at ~0-2 fps). Presentation also blocks while the window is fully hidden, which pauses
+  the game until it's shown again.
+- **Startup**: SDL audio is initialized before the file-dialog library, and the dialog uses the XDG portal
+  instead of in-process GTK; either ordering issue or GTK init could stall startup for 25+ s.
 
 ## Symbols
 

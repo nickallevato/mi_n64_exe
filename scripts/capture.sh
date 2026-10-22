@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# Launch the game with auto-boot, take window screenshots at intervals, then quit.
-#   scripts/capture.sh <out_dir> <seconds_between_shots> <shot_count> [key ...]
-# Each optional key (an xdotool key name, e.g. Return) is held for 1 s after the corresponding shot,
-# so `capture.sh out 5 4 Return` presses Return after the first screenshot.
-# Requires an X11/XWayland display, xdotool and ImageMagick's `import`.
+# Run the game inside a headless sway compositor (real GPU, native Wayland, invisible to the desktop), take
+# screenshots at intervals, optionally inject controller input, then shut everything down.
+#   scripts/capture.sh <out_dir> <seconds_between_shots> <shot_count> [input ...]
+# Each optional input (N64 buttons/stick for MI_INPUT, e.g. START or "A x=1") is held for 1 s after the
+# corresponding shot, so `capture.sh out 5 4 START` presses Start after the first screenshot. Use "" to skip.
+# Extra env vars (MI_STATS, MI_WATCH, ...) pass through to the game. CAPTURE_EXEC="cmd" runs a command (e.g.
+# scripts/stacks.py) right after shot CAPTURE_EXEC_AT (default: the last shot). Requires sway and grim.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -11,38 +13,54 @@ out_dir=${1:?out_dir}
 interval=${2:-5}
 count=${3:-3}
 shift 3 || true
-keys=("$@")
+inputs=("$@")
 
 mkdir -p "$out_dir"
-MI_ROM="${MI_ROM:-$PWD/rom/Mission Impossible (USA).z64}" SDL_VIDEODRIVER=x11 \
+out_dir=$(realpath "$out_dir")
+input_file="$out_dir/input.txt"
+: > "$input_file"
+
+sway_dir=$(mktemp -d)
+printf 'output HEADLESS-1 resolution 1600x900\ndefault_border none\n' > "$sway_dir/config"
+WLR_BACKENDS=headless WLR_RENDERER=vulkan WLR_LIBINPUT_NO_DEVICES=1 WAYLAND_DISPLAY= DISPLAY= \
+    sway --unsupported-gpu -d -c "$sway_dir/config" > "$sway_dir/sway.log" 2>&1 &
+sway_pid=$!
+
+display=""
+for _ in $(seq 1 40); do
+    display=$(grep -oP "Running compositor on wayland display '\K[^']+" "$sway_dir/sway.log" 2>/dev/null)
+    [[ -n "$display" ]] && break
+    read -rt 0.25 <> <(:) || true
+done
+if [[ -z "$display" ]]; then
+    echo "sway failed to start; log: $sway_dir/sway.log"
+    kill -9 "$sway_pid" 2>/dev/null
+    exit 1
+fi
+
+WAYLAND_DISPLAY="$display" DISPLAY= SDL_VIDEODRIVER=wayland MI_INPUT="$input_file" \
+    MI_ROM="${MI_ROM:-$PWD/rom/Mission Impossible (USA).z64}" \
     ./build/app/MIRecompiled > "$out_dir/game.log" 2>&1 &
 pid=$!
-
-win=""
-for _ in $(seq 1 60); do
-    win=$(xdotool search --pid "$pid" --name "Mission" 2>/dev/null | head -1)
-    [[ -n "$win" ]] && break
-    kill -0 "$pid" 2>/dev/null || break
-    read -rt 0.5 <> <(:) || true
-done
-
-# Keep the window raised and focused: the compositor throttles presentation of hidden windows to ~1 fps,
-# which stalls the game (it waits on each frame).
-[[ -n "$win" ]] && xdotool windowactivate --sync "$win" windowraise "$win" 2>/dev/null
 
 for i in $(seq 1 "$count"); do
     read -rt "$interval" <> <(:) || true
     kill -0 "$pid" 2>/dev/null || { echo "game exited early"; break; }
-    [[ -n "$win" ]] && import -window "$win" "$out_dir/shot_$i.png" 2>/dev/null
-    key=${keys[$((i - 1))]:-}
-    if [[ -n "$key" && -n "$win" ]]; then
-        xdotool windowactivate --sync "$win" keydown "$key"
+    WAYLAND_DISPLAY="$display" grim "$out_dir/shot_$i.png" 2>/dev/null
+    if [[ -n "${CAPTURE_EXEC:-}" && "$i" == "${CAPTURE_EXEC_AT:-$count}" ]]; then
+        bash -c "$CAPTURE_EXEC"
+    fi
+    input=${inputs[$((i - 1))]:-}
+    if [[ -n "$input" ]]; then
+        echo "$input" > "$input_file"
         read -rt 1 <> <(:) || true
-        xdotool keyup "$key"
+        : > "$input_file"
     fi
 done
 
 kill -9 "$pid" 2>/dev/null  # the runtime ignores SIGTERM
 wait "$pid" 2>/dev/null
-echo "exit: $? window: ${win:-none}"
+kill -9 "$sway_pid" 2>/dev/null
+wait "$sway_pid" 2>/dev/null
+rm -rf "$sway_dir"
 ls "$out_dir"

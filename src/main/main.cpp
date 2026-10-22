@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 #include <array>
 #include <filesystem>
@@ -50,7 +51,38 @@
 #include "SDL_syswm.h"
 #endif
 
+#ifdef __linux__
+#include <csignal>
+#include <execinfo.h>
+#include <unistd.h>
+
+// Print a backtrace on fatal signals so crashes in recompiled code can be located (needs -rdynamic for names).
+static void crash_handler(int sig) {
+    void* frames[64];
+    int count = backtrace(frames, 64);
+    fprintf(stderr, "\nFatal signal %d, backtrace:\n", sig);
+    backtrace_symbols_fd(frames, count, STDERR_FILENO);
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+static void install_crash_handler() {
+    for (int sig : { SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGABRT }) {
+        signal(sig, crash_handler);
+    }
+}
+#else
+static void install_crash_handler() {}
+#endif
+
 const std::string version_string = "0.1.0";
+
+// Logs a startup milestone with the time since launch, to diagnose slow starts.
+static void log_startup(const char* what) {
+    static const auto launch = std::chrono::steady_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - launch).count();
+    fprintf(stderr, "[startup %5lld ms] %s\n", (long long)ms, what);
+}
 
 template<typename... Ts>
 void exit_error(const char* str, Ts ...args) {
@@ -67,18 +99,31 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
     SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE, "1");
     SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+#if defined(__linux__)
+    // SDL2 defaults to X11. In a Wayland session that means XWayland, where Vulkan presentation can block for
+    // long stretches (seen with NVIDIA on GNOME), stalling the game. Prefer native Wayland unless overridden.
+    if (std::getenv("SDL_VIDEODRIVER") == nullptr && std::getenv("WAYLAND_DISPLAY") != nullptr) {
+        SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland,x11");
+    }
+#endif
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC) > 0) {
         exit_error("Failed to initialize SDL2: %s\n", SDL_GetError());
     }
 
     fprintf(stdout, "SDL Video Driver: %s\n", SDL_GetCurrentVideoDriver());
+    log_startup("SDL video/input initialized");
 
     return {};
 }
 
 ultramodern::input::connected_device_info_t get_connected_device_info(int controller_num) {
-    if (recompinput::players::is_single_player_mode() || recompinput::players::get_player_is_assigned(controller_num)) {
+    // Single player only uses port 1. Reporting more ports also hits an ultramodern bug where osContInit's
+    // bitpattern only keeps the last connected port (`*pattern = 1 << controller` instead of `|=`).
+    bool connected = recompinput::players::is_single_player_mode()
+        ? controller_num == 0
+        : recompinput::players::get_player_is_assigned(controller_num);
+    if (connected) {
         return ultramodern::input::connected_device_info_t{
             .connected_device = ultramodern::input::Device::Controller,
             .connected_pak = ultramodern::input::Pak::None,
@@ -89,6 +134,48 @@ ultramodern::input::connected_device_info_t get_connected_device_info(int contro
         .connected_device = ultramodern::input::Device::None,
         .connected_pak = ultramodern::input::Pak::None,
     };
+}
+
+// Development/testing input injection: when MI_INPUT names a file, its contents are added to controller 1's
+// input on every poll. The file holds whitespace-separated N64 button names (A B Z START L R DU DD DL DR CU CD
+// CL CR) and optional stick values (x=-1..1 y=-1..1). Empty the file to release everything.
+bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
+    bool ret = recompinput::profiles::get_n64_input(controller_num, buttons, x, y);
+
+    static const char* input_path = std::getenv("MI_INPUT");
+    if (input_path == nullptr || controller_num != 0) {
+        return ret;
+    }
+
+    FILE* f = std::fopen(input_path, "r");
+    if (f == nullptr) {
+        return ret;
+    }
+
+    static const std::pair<const char*, uint16_t> button_names[] = {
+        {"A", 0x8000}, {"B", 0x4000}, {"Z", 0x2000}, {"START", 0x1000},
+        {"DU", 0x0800}, {"DD", 0x0400}, {"DL", 0x0200}, {"DR", 0x0100},
+        {"L", 0x0020}, {"R", 0x0010}, {"CU", 0x0008}, {"CD", 0x0004}, {"CL", 0x0002}, {"CR", 0x0001},
+    };
+    char token[32];
+    while (std::fscanf(f, "%31s", token) == 1) {
+        float value;
+        if (std::sscanf(token, "x=%f", &value) == 1) {
+            *x = value;
+        }
+        else if (std::sscanf(token, "y=%f", &value) == 1) {
+            *y = value;
+        }
+        else {
+            for (const auto& [name, mask] : button_names) {
+                if (std::strcmp(token, name) == 0) {
+                    *buttons |= mask;
+                }
+            }
+        }
+    }
+    std::fclose(f);
+    return true;
 }
 
 SDL_Window* window;
@@ -107,6 +194,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     if (window == nullptr) {
         exit_error("Failed to create window: %s\n", SDL_GetError());
     }
+    log_startup("window created");
 
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
@@ -385,6 +473,8 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    log_startup("main");
+    install_crash_handler();
     set_cwd_to_executable_dir();
 
     // Keep log output ordered and immediate when redirected to a file.
@@ -397,19 +487,24 @@ int main(int argc, char** argv) {
     SDL_setenv("SDL_AUDIODRIVER", "wasapi", true);
 #endif
 
-    // Initialize native file dialogs.
-    NFD_Init();
-
-    // Initialize program settings.
-    recompui::programconfig::set_program_name(mi::program_name);
-    recompui::programconfig::set_program_id(mi::program_id);
-
-    // Initialize SDL audio and set the output frequency.
+    // Initialize SDL audio and set the output frequency. This must happen before NFD_Init: once GTK has set up
+    // its D-Bus connection, SDL's synchronous RealtimeKit request for the audio thread can stall startup for
+    // 25+ seconds.
     SDL_InitSubSystem(SDL_INIT_AUDIO);
     if (!reset_audio(48000)) {
         // It is not possible to initialize without an audio device.
         return EXIT_FAILURE;
     }
+
+    log_startup("audio initialized");
+
+    // Initialize native file dialogs.
+    NFD_Init();
+    log_startup("file dialogs initialized");
+
+    // Initialize program settings.
+    recompui::programconfig::set_program_name(mi::program_name);
+    recompui::programconfig::set_program_id(mi::program_id);
 
     // Source controller mappings file
     std::u8string controller_db_path = (recompui::file::get_program_path() / "recompcontrollerdb.txt").u8string();
@@ -449,6 +544,7 @@ int main(int argc, char** argv) {
 
     ultramodern::renderer::callbacks_t renderer_callbacks{
         .create_render_context = [](uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
+            mi::stats_set_rdram(rdram);
             auto presentation_mode = ultramodern::renderer::PresentationMode::PresentEarly;
             return recompui::renderer::create_render_context(rdram, window_handle, presentation_mode, developer_mode);
         },
@@ -468,13 +564,16 @@ int main(int argc, char** argv) {
 
     ultramodern::input::callbacks_t input_callbacks{
         .poll_input = recompinput::poll_inputs,
-        .get_input = recompinput::profiles::get_n64_input,
+        .get_input = get_input,
         .set_rumble = recompinput::set_rumble,
         .get_connected_device_info = get_connected_device_info,
     };
 
     ultramodern::events::callbacks_t thread_callbacks{
-        .vi_callback = recompinput::update_rumble,
+        .vi_callback = []() {
+            recompinput::update_rumble();
+            mi::stats_on_vi();
+        },
         .gfx_init_callback = nullptr,
     };
 
@@ -486,6 +585,7 @@ int main(int argc, char** argv) {
         .get_game_thread_name = get_game_thread_name,
     };
 
+    log_startup("starting runtime");
     recomp::start(
         project_version,
         {},

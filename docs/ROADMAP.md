@@ -9,10 +9,10 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] Recompile all main-segment CPU code (1697 functions)
 - [x] Identify the RSP microcodes: graphics F3DEX.NoN 1.21 (RT64 HLE), audio n_aspMain (RSPRecomp)
 - [x] App glue: RT64 renderer, SDL audio, ultramodern/librecomp, RecompFrontend launcher + config tabs
-- [ ] Boot to the title screen
-- [ ] Keyboard/controller input (recompinput profiles, rebinding in the Controls tab)
+- [x] Boot through intros to the save-select and difficulty menus
+- [x] Keyboard/controller input reaches the game (default bindings; menus navigate)
 - [ ] Audio playback
-- [ ] EEPROM saves
+- [x] EEPROM detected (save-select screen loads)
 
 ## Phase 2: Playable
 - [ ] Play through the first mission; fix crashes, rendering and audio issues as they appear

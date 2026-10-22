@@ -27,3 +27,12 @@ __osAiDeviceBusy = 0x8007DC20;
 // Waits until the gfx task for the current framebuffer slot (D_800A1F38) is done (pending flag
 // D_800A1F39[slot]), then starts the frame's display list. Yield hook in mi.us.toml.
 Gfx_BeginFrame = 0x8006C058;
+// Builds the frame's OSScTask (F3DEX.NoN gfx task), marks the framebuffer slot pending and sends it to the
+// libultra scheduler's command queue, then flips the slot.
+Gfx_SubmitTask = 0x8006C0D8;
+// Waits until the gfx tasks of both framebuffer slots are done (pending flags D_800A1F39/D_800A1F3A).
+// Used before screen transitions. Yield hooks in mi.us.toml.
+Gfx_WaitAllTasksDone = 0x8006C2F0;
+// EEPROM long read (n64sym missed it): loops osEepromRead then waits on an osSetTimer delay, like
+// osEepromLongWrite right before it. The runtime replaces it; unreplaced, loading save data hangs.
+osEepromLongRead = 0x800754F0;
