@@ -79,3 +79,136 @@ Audio_HandleFrame = 0x800726E4;
 // Rom_Read(src, dst, size): copies size bytes from cartridge ROM offset src (PI DMA in chunks of D_8008E530) to RAM
 // dst; a RAM source (0x8xxxxxxx) is a plain copy.
 Rom_Read = 0x80068638;
+
+// ==== Levels and assets (docs/levels-loading.md) ====
+// ---- "Burp" archives (every asset in ROM 0x94440-0xBEC6B0 is in one) ----
+// Burp_Open(romStart, romEnd): reads the 'Burp' header, the count x 0x14-byte entry table and (if entry 0 has a name)
+// the name table; makes entry data offsets absolute ROM addresses. Returns a 0x18-byte handle (+0 count, +4 entries,
+// +8 names, +0xC romStart, +0x10 size, +0x14 name-table offset) or 0 if the magic is wrong.
+Burp_Open = 0x80068820;
+// Frees an archive handle with its entry and name tables.
+Burp_Close = 0x80068990;
+// Burp_GetEntry(h, i): &entries[i] (0x14 bytes: +0 decoded size, +4 stored size, +8 name, +0xC ROM address,
+// +0x10 packing 0 = stored / 4 = deflate), or 0 if out of range.
+Burp_GetEntry = 0x800689E0;
+// Burp_GetName(h, i): name of entry i, 0 if the archive has no names.
+Burp_GetName = 0x80068A10;
+// Burp_FindByName(h, name): index of the entry with that name, or -1.
+Burp_FindByName = 0x80068A50;
+// Burp_CopyEntry(h, i, out): copies the 0x14-byte entry to out, returns 1.
+Burp_CopyEntry = 0x80068AFC;
+// Burp_GetCount(h): number of entries.
+Burp_GetCount = 0x80068B50;
+// Burp_ReadRaw(h, i, dst): Rom_Read of the entry's stored bytes (no decoding).
+Burp_ReadRaw = 0x80068B58;
+// Burp_LoadTo(h, i, dst): decodes entry i into dst (stored: Rom_Read; deflate: Inflate_FromRom via a temp buffer).
+Burp_LoadTo = 0x80068BB4;
+// Burp_Load(h, i): Heap_Alloc(decoded size) and decode entry i into it; returns the buffer (0 on failure).
+Burp_Load = 0x80068CF0;
+// By-name variants of Burp_ReadRaw / Burp_LoadTo / Burp_Load (no direct callers).
+Burp_ReadRawByName = 0x80068E98;
+Burp_LoadToByName = 0x80068FA0;
+Burp_LoadByName = 0x80069170;
+
+// ---- raw deflate decoder (a port of gzip's inflate.c) ----
+// Inflate_FromRom(src, dst, srcSize, tmp, tmpSize): inflates raw deflate data from ROM (or RAM if src is
+// 0x8xxxxxxx), streaming the input through tmp and refilling with Rom_Read.
+Inflate_FromRom = 0x8006B5FC;
+// inflate_block: reads the block header and dispatches on the type (0 stored, 1 fixed, 2 dynamic).
+Inflate_Block = 0x8006B358;
+Inflate_Stored = 0x8006A118;
+Inflate_Fixed = 0x8006A4BC;
+Inflate_Dynamic = 0x8006A6A8;
+// huft_build: builds Huffman decoding tables (called by the fixed and dynamic decoders).
+Inflate_HuftBuild = 0x80069274;
+// inflate_codes: decodes literal/length/distance codes (called by the fixed and dynamic decoders).
+Inflate_Codes = 0x80069954;
+
+// ---- heap ----
+// Initializes the heap from the end of BSS (0x800BB240) to osMemSize.
+Heap_Init = 0x8006B720;
+// Heap_Alloc(size).
+Heap_Alloc = 0x8006B790;
+// Heap_Free(ptr). NOTE: symbols/libultra.txt calls this n_alSynRemovePlayer (an n64sym mismatch). The game uses it
+// as free() everywhere, e.g. Burp_Load frees its temp buffer with it, and so does Burp_Close.
+Heap_Free = 0x8006B8F8;
+// Size of the largest free heap block (Burp_Load sizes its decompression buffer with it).
+Heap_GetLargestFree = 0x8006BD28;
+
+// ---- boot-time archive openers (called from Game_ThreadMain) ----
+// Opens the audio archive 0x94440 (wave tables + pointer tables) and the music archive 0x2FE2A0, sets up the
+// audio heap.
+Audio_Init = 0x8000DAA0;
+// Opens the text archive 0x30D890 and loads entry 0 (UI strings, including level names) into D_800A9508.
+Text_Init = 0x80028604;
+// Loads text archive entry 3 (mission briefings).
+Text_LoadBriefings = 0x80028694;
+// Opens the prop-model archive 0x310280 (named *.DOF entries) into D_80093AC0.
+Props_OpenArchive = 0x80028CB8;
+// Opens the font archive 0x7FF7C0 into D_80093CF0.
+Fonts_OpenArchive = 0x80035CC0;
+// Opens the level geometry-bank archive 0x8FFCC0 (41 banks) into D_800A9840.
+GeoBank_OpenArchive = 0x80046BF8;
+// Opens the character-model archive 0x487550 into D_800BA8E0 and creates its 30-slot cache.
+Chars_OpenArchive = 0x80053310;
+// Opens the animation archive 0x63E510 into D_800BA8E4, loads its last entry as the animation table D_800BA97C
+// (making +4 root-track offsets absolute) and precomputes per-animation root speeds into D_800A9680.
+Anims_OpenArchive = 0x80054680;
+// Opens the 2D image archive 0x785160 (menus, HUD) into D_8008C520.
+Images_OpenArchive = 0x800632B8;
+
+// ---- level loading ----
+// Game_RunMission: plays the current mission's stage list from D_800A9868 on (mission intro first when starting at
+// stage 0); runs Game_LevelLoop per entry with mode 0 (flag 0x80 scenes), 1 (flags 0x60 continuations) or 3.
+Game_RunMission = 0x80049960;
+// Mission/level select menu flow: the cursor skips stage entries with flags & 0xE0, stores the mission in
+// D_800BADD8 and the stage-list index in D_800A9868, then calls Game_RunMission.
+Game_MissionSelect = 0x80049274;
+// Relocates a freshly loaded geometry bank (D_80096000): header pointers and the BSP tree, 0x04xxxxxx -> base+offset;
+// sets the root D_80096004.
+GeoBank_Relocate = 0x80046DF4;
+// Recursive BSP walkers used by GeoBank_Relocate (node: +0 left, +4 right, +8 s16 type; type 3 = leaf).
+GeoBank_RelocateTree = 0x80046D04;
+GeoBank_RelocateSubtree = 0x80046C84;
+// Loads DOFBB.BIN and resolves the geometry bank's prop table (bank header +4, 0x2C-byte records starting with a
+// *.DOF name) to prop-archive indices with Burp_FindByName.
+Props_LoadLevelList = 0x8002913C;
+// Script_Load(levelArchive): loads level entries 1 ("SOOL" script, D_800A98C4), 2 (D_8008AF40), 3 (D_800A98CC) and
+// 7 (dialogue strings, D_800BA8FC) and starts the level script.
+Script_Load = 0x8005A384;
+// Loads level entry 8 (objective strings) into D_8009C770.
+Level_LoadObjectives = 0x800551E0;
+// Loads level entry 10 (level config: object pool size and other limits).
+Level_LoadConfig = 0x80029974;
+// Loads level entry 4 (count x 0x10-byte records, D_800B9944; zones?).
+Level_LoadBlock4 = 0x80033430;
+// Loads level entry 5 (header copied to D_800A9210, W x H grid; AI navigation?).
+Level_LoadBlock5 = 0x80006FB0;
+// Loads level entry 6 (offset table of s16 xyz lists, D_800BAB98; paths?).
+Level_LoadBlock6 = 0x800136D4;
+// Loads level entry 9 (offset table, D_800B9934).
+Level_LoadBlock9 = 0x8001DA88;
+// Makes the offsets in the header/offset table of level entries 2 and 3 absolute.
+Level_RelocateTableSet = 0x80046778;
+
+// ---- data ----
+// Mission table: 5 x 0x14-byte entries in menu order (+0 name string offset, +2 flags, +4/+8 intro scene archive
+// ROM start/end, +0x10 pointer to the stage list).
+MissionTable = 0x8008AB28;
+// Two extra scene entries per mission (0x14 bytes each), picked through D_8008AC28.
+MissionExtraScenes = 0x8008A4E8;
+// Intro/title scene stage entry (archive 0x8FEF90), run at boot.
+TitleSceneStage = 0x8008A880;
+// Selected mission index (into MissionTable).
+CurMission = 0x800BADD8;
+// Selected / resume stage-list index within the current mission.
+CurStage = 0x800A9868;
+// Burp handle of the level being played.
+LevelArchive = 0x800A9654;
+// Burp handle of the geometry-bank archive 0x8FFCC0.
+GeoBankArchive = 0x800A9840;
+// Loaded geometry bank (segment 4 base) and its BSP root.
+GeoBank = 0x80096000;
+GeoBankRoot = 0x80096004;
+// UI string table (text archive entry 0).
+UIStrings = 0x800A9508;

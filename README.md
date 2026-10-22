@@ -42,7 +42,7 @@ The app is built like [BanjoRecomp](https://github.com/BanjoRecomp/BanjoRecomp),
 |---|---|
 | ![Embassy Function: the ballroom](docs/media/embassy_ballroom.jpg) | ![Embassy Function: a guard in the hallway](docs/media/embassy_guard.jpg) |
 | ![CIA Rooftop](docs/media/cia_rooftop.jpg) | ![Train Roof](docs/media/train_roof.jpg) |
-| ![Lundkwist Base: the opening](docs/media/icehit_truck.jpg) | ![Subpen](docs/media/subpen.jpg) |
+| ![Ice Hit: Subpen](docs/media/icehit_truck.jpg) | ![Subpen](docs/media/subpen.jpg) |
 
 1080p, widescreen, captured from the recomp.
 
@@ -162,6 +162,14 @@ RSPRecomp.
 - **Quitting**: the game's threads are never joined, so the app keeps game memory mapped
   (`patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch`) and exits without static destructors once saves are
   written. Before this, quitting crashed in 4 of 5 tries.
+
+</details>
+
+<details>
+<summary>Levels and assets</summary>
+
+Levels are stored in compressed "Burp" archives. `scripts/levels/level_export.py` exports any level's geometry
+to OBJ with textures. See [docs/LEVELS.md](docs/LEVELS.md) for the level table, archive format and geometry format.
 
 </details>
 
