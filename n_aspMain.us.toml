@@ -1,0 +1,14 @@
+# Mission: Impossible (USA) audio microcode (n_aspMain, same build as other n_audio games).
+# Text: VRAM 0x80085360 (set as OSTask.ucode by the audio task builder at 0x800727F4).
+# Data: VRAM 0x80090DE0; its first 16 halfwords after +0x10 are the audio command dispatch table.
+text_offset = 0x85F60
+text_size = 0xE20
+text_address = 0x04001080
+rom_file_path = "rom/Mission Impossible (USA).z64"
+output_file_path = "rsp/n_aspMain.cpp"
+output_function_name = "n_aspMain"
+extra_indirect_branch_targets = [
+    # dispatch table (aspMain data + 0x10)
+    0x1118, 0x1470, 0x11DC, 0x1B38, 0x1214, 0x187C, 0x1254, 0x12D0,
+    0x12EC, 0x1328, 0x140C, 0x1294, 0x1E24, 0x138C, 0x170C, 0x144C,
+]

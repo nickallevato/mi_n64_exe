@@ -10,3 +10,20 @@ game_halt = 0x800606C4;
 // libultra functions n64sym missed (identified by their callees)
 osContInit = 0x800793C0;
 viMgrMain = 0x8007E2B8;
+// Graphics/audio scheduler (thread 9). Receives scheduler messages; msg 1 (retrace) increments
+// the frame counter D_800A1F3C, msgs 0x64/0x65 clear the D_800A1F39/D_800A1F3A pending flags.
+Sched_ThreadMain = 0x8006C86C;
+// Busy-waits until the retrace counter D_800A1F3C changes (yield hook in mi.us.toml,
+// since a non-yielding loop deadlocks ultramodern's cooperative thread scheduling).
+Sched_WaitForRetrace = 0x8006C31C;
+// Stores the graphics microcode text/data pointers used for gfx tasks (F3DEX.NoN).
+Sched_SetGfxUcode = 0x8006C84C;
+// Main game thread entry (thread 6).
+Game_ThreadMain = 0x80048988;
+// Audio interface libultra functions n64sym missed (identified by AI register access)
+osAiGetLength = 0x80074EF0;
+osAiSetNextBuffer = 0x80075030;
+__osAiDeviceBusy = 0x8007DC20;
+// Waits until the gfx task for the current framebuffer slot (D_800A1F38) is done (pending flag
+// D_800A1F39[slot]), then starts the frame's display list. Yield hook in mi.us.toml.
+Gfx_BeginFrame = 0x8006C058;

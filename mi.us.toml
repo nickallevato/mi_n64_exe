@@ -9,3 +9,19 @@ functions_per_output_file = 50
 [patches]
 stubs = []
 ignored = []
+
+# Busy-wait loops. On hardware, interrupt-driven higher-priority threads preempt these loops; ultramodern
+# schedules game threads cooperatively, so each loop must yield while it's still waiting or it deadlocks.
+# Each hook runs right before the loop's branch and only yields when the branch is about to loop again.
+
+# Wait for the scheduler to bump the retrace counter (beq $v1, $v0 loops while unchanged).
+[[patches.hook]]
+func = "Sched_WaitForRetrace"
+before_vram = 0x8006C32C
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r3 == ctx->r2) yield_self_1ms(rdram); }"
+
+# Wait for the gfx task using the current framebuffer slot to finish (bnez $v0 loops while pending).
+[[patches.hook]]
+func = "Gfx_BeginFrame"
+before_vram = 0x8006C070
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"

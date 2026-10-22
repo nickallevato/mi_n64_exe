@@ -34,9 +34,34 @@ python3 -m venv tools/venv && tools/venv/bin/pip install 'splat64[mips]'
 cd split && ln -sf "../rom/Mission Impossible (USA).z64" baserom.z64 \
   && ../tools/venv/bin/python -m splat split missionimpossible.yaml && cd ..
 
-# recompile
+# recompile (game code -> RecompiledFuncs/, audio microcode -> rsp/)
+cmake -S lib/N64ModernRuntime/N64Recomp -B build/n64recomp -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build/n64recomp --target N64Recomp RSPRecomp
 scripts/recomp.sh
 ```
+
+## Building and running the app
+
+Uses the BanjoRecomp app layout: RT64 renderer, N64ModernRuntime, and RecompFrontend (launcher, config
+menus, input, mods). Libraries are pinned submodules under `lib/`.
+
+```sh
+git submodule update --init --recursive
+sudo apt-get install cmake ninja-build clang lld libsdl2-dev libgtk-3-dev libfreetype-dev
+cmake -S . -B build/app -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+cmake --build build/app
+MI_ROM="rom/Mission Impossible (USA).z64" build/app/MIRecompiled   # MI_ROM auto-boots; omit to use the launcher
+```
+
+Dev tools: `scripts/capture.sh` (launch + screenshots + key presses), `scripts/stacks.py` (game thread
+stacks via gdb).
+
+## Runtime fixes
+
+- **Busy-wait loops** (`[[patches.hook]]` in `mi.us.toml`): the game spins on globals that interrupt-driven
+  threads update. ultramodern schedules game threads cooperatively, so those loops get a yield hook.
+- The graphics thread blocks on presentation while the window is hidden (the compositor throttles it to
+  ~1 fps), which slows the game to match. Keep the window visible when testing.
 
 ## Symbols
 

@@ -14,3 +14,4 @@ split/*.ld
 split/n64sym*.txt
 syms.toml
 *.log
+rsp/
