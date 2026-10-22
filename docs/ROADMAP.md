@@ -43,7 +43,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] Mouse aims the Gunboat turret (normal path; A/B-compared against a no-input run)
 - [ ] Player_AimControl (state 0x100000) mouse hooks: that state is only entered by a script command
       (func_8003D844); not reached in any tested level
-- [ ] Low input lag (present-early mode is already on)
+- [x] Smooth frame pacing: vsync (FIFO) instead of mailbox. Present intervals on a 59.98 Hz display: p1-p99
+      14.9-18.3 ms (mailbox: 4.7-34.5 ms, 12 doubled frames in 17 s); hidden windows still run at 60 FPS
+- [ ] Low input lag (present-early mode is already on; vsync adds up to a frame, measure it)
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
 - [x] Runs well on Linux/GNOME/NVIDIA: native Wayland, mailbox presentation (no freeze when hidden), <1 s
       startup, ~22% CPU, 3-minute random-input soak without issues, identical audio at 30/60 FPS

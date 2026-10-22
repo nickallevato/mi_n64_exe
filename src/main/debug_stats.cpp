@@ -3,6 +3,7 @@
 //   MI_WATCH=... game RAM words, as comma-separated "ADDR[:COUNT]" (hex). "*ADDR+OFF" reads the pointer at ADDR
 //                and adds OFF, e.g. "*0x8009FE38+0x6C:4" for 4 words starting at a struct field.
 //   MI_DUMP_DIR=dir  write the first 8 MB of game RAM to dir/ram_<second>.bin (native word order).
+//   MI_FRAMETIMES=file  log a timestamp (us) per VI ("V <us>") and per gfx task submit ("G <us>"), for frame pacing.
 // Applied every VI rather than once per second:
 //   MI_POKE=ADDR=VALUE,...  GameShark-style byte writes (hex), e.g. "0x8008A846=1" enables a level.
 #include <atomic>
@@ -24,6 +25,13 @@ static const char* watch_spec = std::getenv("MI_WATCH");
 static const char* dump_dir = std::getenv("MI_DUMP_DIR");
 static const char* poke_spec = std::getenv("MI_POKE");
 static uint8_t* stats_rdram = nullptr;
+static FILE* frametimes = std::getenv("MI_FRAMETIMES") ? std::fopen(std::getenv("MI_FRAMETIMES"), "w") : nullptr;
+
+static void log_frametime(char kind) {
+    static const auto start = std::chrono::steady_clock::now();
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count();
+    std::fprintf(frametimes, "%c %lld\n", kind, static_cast<long long>(us));
+}
 
 static void apply_pokes() {
     std::string spec = poke_spec;
@@ -101,6 +109,9 @@ static void print_watches() {
 
 // Called from a recompiler hook at the start of the game's gfx task submit function (see mi.us.toml).
 extern "C" void mi_stats_gfx_submit() {
+    if (frametimes != nullptr) {
+        log_frametime('G');
+    }
     gfx_tasks++;
 }
 
@@ -122,6 +133,9 @@ static void dump_ram() {
 void mi::stats_on_vi() {
     if (poke_spec != nullptr && stats_rdram != nullptr) {
         apply_pokes();
+    }
+    if (frametimes != nullptr) {
+        log_frametime('V');
     }
     if (!stats_enabled && watch_spec == nullptr && dump_dir == nullptr) {
         return;

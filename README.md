@@ -137,9 +137,12 @@ RSPRecomp.
   EEPROM long read, ...). An unreplaced libultra function that waits on hardware hangs or crashes.
 - **Wayland**: on a Wayland session the app uses native Wayland. Through XWayland, NVIDIA's Vulkan presentation
   stalls (the game runs at ~0-2 fps).
-- **Hidden windows**: FIFO presentation blocks while the window is hidden (NVIDIA + Wayland), freezing the game.
-  `patches/deps/plume-prefer-mailbox.patch` (applied to RT64's plume by CMake) uses mailbox presentation when
-  available; a hidden window keeps running at 60 FPS with normal CPU/GPU use.
+- **Vsync and hidden windows**: presentation uses vsync (FIFO), so every game frame gets its own display refresh.
+  Mailbox presentation dropped and doubled frames whenever a frame landed near a refresh boundary (visible
+  microjitter). On NVIDIA + Wayland, a vsync present blocks while the window is hidden, which would freeze the
+  game, so RT64 checks (via present wait) that the last frame reached the screen and skips presenting until it does
+  (`patches/deps/plume-wait-for-last-present.patch`, `patches/deps/rt64-skip-present-while-hidden.patch`). A hidden
+  window keeps running at 60 FPS.
 - **Startup**: SDL audio is initialized before the file-dialog library, and the dialog uses the XDG portal
   instead of in-process GTK; either ordering issue or GTK init could stall startup for 25+ s.
 - **Quitting**: the game's threads are never joined, so the app keeps game memory mapped
@@ -171,6 +174,7 @@ N64ModernRuntime can provide its own implementations.
 - `scripts/find_spins.py` lists busy-wait loops that need yield hooks.
 - `scripts/gen_controls_map.py docs/controls.svg` redraws the controls map.
 - `MI_STATS=1` prints graphics tasks and VIs per second; `MI_WATCH=addr[:n],...` prints game RAM each second.
+- `MI_FRAMETIMES=file` logs a timestamp for every VI and every game frame submitted, for checking frame pacing.
 
 </details>
 

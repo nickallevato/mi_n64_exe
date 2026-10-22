@@ -1,0 +1,64 @@
+diff --git a/plume_render_interface.h b/plume_render_interface.h
+index 2048557..a87d8a0 100644
+--- a/plume_render_interface.h
++++ b/plume_render_interface.h
+@@ -89,6 +89,10 @@ namespace plume {
+         virtual ~RenderSwapChain() { }
+         virtual bool present(uint32_t textureIndex, RenderCommandSemaphore **waitSemaphores, uint32_t waitSemaphoreCount) = 0;
+         virtual void wait() = 0;
++
++        // Waits up to timeoutNs for the most recent present to reach the screen. Returns false on timeout, which means
++        // the surface isn't being displayed (e.g. a hidden window); presenting again could then block indefinitely.
++        virtual bool waitForLastPresent(uint64_t timeoutNs) { return true; }
+         virtual bool resize() = 0;
+         virtual bool needsResize() const = 0;
+         virtual void setVsyncEnabled(bool vsyncEnabled) = 0;
+diff --git a/plume_vulkan.cpp b/plume_vulkan.cpp
+index f1dd503..f6472bc 100644
+--- a/plume_vulkan.cpp
++++ b/plume_vulkan.cpp
+@@ -2300,6 +2300,14 @@ namespace plume {
+         return true;
+     }
+ 
++    bool VulkanSwapChain::waitForLastPresent(uint64_t timeoutNs) {
++        if (!desc.enablePresentWait || (currentPresentId < firstPresentIdOfSwapChain)) {
++            return true;
++        }
++
++        return vkWaitForPresentKHR(commandQueue->device->vk, vk, currentPresentId, timeoutNs) != VK_TIMEOUT;
++    }
++
+     void VulkanSwapChain::wait() {
+         assert(desc.enablePresentWait && "Present wait should've been explicitly enabled during swap chain creation before using the wait function.");
+ 
+@@ -2358,6 +2366,9 @@ namespace plume {
+         // Reset present counter.
+         presentCount = 1;
+ 
++        // Present IDs keep counting across swap chains, but only IDs presented to this one can be waited on.
++        firstPresentIdOfSwapChain = currentPresentId + 1;
++
+         if (createInfo.oldSwapchain != VK_NULL_HANDLE) {
+             vkDestroySwapchainKHR(commandQueue->device->vk, createInfo.oldSwapchain, nullptr);
+         }
+diff --git a/plume_vulkan.h b/plume_vulkan.h
+index 0a1edbe..3940060 100644
+--- a/plume_vulkan.h
++++ b/plume_vulkan.h
+@@ -239,6 +239,7 @@ namespace plume {
+         VkCompositeAlphaFlagBitsKHR pickedAlphaFlag = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+         std::vector<VulkanTexture> textures;
+         uint64_t currentPresentId = 0;
++        uint64_t firstPresentIdOfSwapChain = 1;
+         bool immediatePresentModeSupported = false;
+         bool mailboxPresentModeSupported = false;
+ 
+@@ -246,6 +247,7 @@ namespace plume {
+         ~VulkanSwapChain() override;
+         bool present(uint32_t textureIndex, RenderCommandSemaphore **waitSemaphores, uint32_t waitSemaphoreCount) override;
+         void wait() override;
++        bool waitForLastPresent(uint64_t timeoutNs) override;
+         bool resize() override;
+         bool needsResize() const override;
+         void setVsyncEnabled(bool vsyncEnabled) override;

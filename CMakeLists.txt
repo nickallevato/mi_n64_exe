@@ -46,9 +46,10 @@ function(apply_dependency_patch repo_dir patch_file)
     endif()
 endfunction()
 
-# Prefer mailbox presentation: FIFO acquisition blocks while the window is hidden on some drivers (NVIDIA + Wayland),
-# which stalls the renderer and with it the game.
-apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/plume ${CMAKE_SOURCE_DIR}/patches/deps/plume-prefer-mailbox.patch)
+# Vsync (FIFO) presentation blocks indefinitely while the window is hidden on some drivers (NVIDIA + Wayland), which
+# would stall the game. RT64 skips presenting while the last present hasn't reached the screen (via present wait).
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/plume ${CMAKE_SOURCE_DIR}/patches/deps/plume-wait-for-last-present.patch)
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-skip-present-while-hidden.patch)
 # Keep game memory mapped at quit: the game's threads are never joined and crash if it's unmapped under them.
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime ${CMAKE_SOURCE_DIR}/patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch)
 

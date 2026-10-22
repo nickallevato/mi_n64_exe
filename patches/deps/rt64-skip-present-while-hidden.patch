@@ -1,0 +1,35 @@
+diff --git a/src/hle/rt64_present_queue.cpp b/src/hle/rt64_present_queue.cpp
+index 3227ab1..777263d 100644
+--- a/src/hle/rt64_present_queue.cpp
++++ b/src/hle/rt64_present_queue.cpp
+@@ -298,7 +298,17 @@ namespace RT64 {
+             }
+ 
+             uint32_t swapChainIndex = 0;
+-            const bool presentFrame = (i < framesToPresent) && swapChainValid;
++            bool presentFrame = (i < framesToPresent) && swapChainValid;
++
++            // Some drivers (NVIDIA + Wayland) block vsync presentation indefinitely while the window isn't displayed,
++            // which would stall the game. Skip presenting until the last present reaches the screen; once hidden, only
++            // poll so the game keeps running at full speed.
++            if (presentFrame && presentWaitEnabled) {
++                const uint64_t timeoutNs = surfaceHidden ? 0 : 50'000'000;
++                surfaceHidden = !ext.swapChain->waitForLastPresent(timeoutNs);
++                presentFrame = !surfaceHidden;
++            }
++
+             if (presentFrame) {
+                 swapChainValid = ext.swapChain->acquireTexture(acquiredSemaphore.get(), &swapChainIndex);
+             }
+diff --git a/src/hle/rt64_present_queue.h b/src/hle/rt64_present_queue.h
+index e08b02c..ce3a901 100644
+--- a/src/hle/rt64_present_queue.h
++++ b/src/hle/rt64_present_queue.h
+@@ -57,6 +57,7 @@ namespace RT64 {
+         Timestamp presentTimestamp;
+         VIHistory viHistory;
+         bool presentWaitEnabled = false;
++        bool surfaceHidden = false;
+ 
+         PresentQueue();
+         ~PresentQueue();
