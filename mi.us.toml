@@ -30,6 +30,13 @@ func = "Anim_GetRootDelta"
 before_vram = 0x80005E64
 text = "{ void mi_root_motion_end(uint8_t*, uint32_t, uint32_t); mi_root_motion_end(rdram, (uint32_t)ctx->r9, (uint32_t)ctx->r11); }"
 
+# Audio frame size clamp (src/game/enhancements.cpp): the audio manager's minimum-size check is an unsigned compare
+# of a signed frame size, so a negative size passes and later becomes a ~4 GB osAiSetNextBuffer length. $s0 = info.
+[[patches.hook]]
+func = "Audio_HandleFrame"
+before_vram = 0x80072774
+text = "{ void mi_audio_clamp_frame_samples(uint8_t*, uint32_t); mi_audio_clamp_frame_samples(rdram, (uint32_t)ctx->r16); }"
+
 # Mouse turning outside aim mode (src/game/mouse.cpp): applied to Ethan's yaw at the start of player control.
 [[patches.hook]]
 func = "Player_Control"

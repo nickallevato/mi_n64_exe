@@ -31,7 +31,7 @@ cleanup() {
     rm -rf "$sway_dir"
 }
 trap cleanup EXIT INT TERM
-printf 'output HEADLESS-1 resolution 1600x900\ndefault_border none\n' > "$sway_dir/config"
+printf "output HEADLESS-1 resolution ${CAPTURE_RES:-1600x900}\ndefault_border none\n" > "$sway_dir/config"
 SWAYSOCK="$sway_dir/ipc.sock" WLR_BACKENDS=headless WLR_RENDERER=vulkan WLR_LIBINPUT_NO_DEVICES=1 WAYLAND_DISPLAY= DISPLAY= \
     sway --unsupported-gpu -d -c "$sway_dir/config" > "$sway_dir/sway.log" 2>&1 &
 sway_pid=$!

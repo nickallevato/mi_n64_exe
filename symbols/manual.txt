@@ -73,3 +73,6 @@ Model_GetRootMotion = 0x80005FCC;
 // 30 Hz tick), +0xC time in keyframes. Animation table: D_800BA97C, 12 bytes per id (+0x2 keyframe count, +0x4 root
 // track).
 Anim_GetRootDelta = 0x80005B7C;
+// Audio manager frame (like libultra's __amHandleFrameMsg): queues the previous frame's samples with
+// osAiSetNextBuffer, sizes this frame from osAiGetLength (min D_800A519C), builds and sends the audio task.
+Audio_HandleFrame = 0x800726E4;

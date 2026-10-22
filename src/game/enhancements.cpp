@@ -1,6 +1,7 @@
 // Native helpers called from recompiler hooks (mi.us.toml) to implement enhancements.
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <unordered_map>
 
 #include "mi_config.h"
@@ -89,4 +90,28 @@ extern "C" void mi_root_motion_end(uint8_t* rdram, uint32_t state, uint32_t out)
     };
     ram_f32_ref(rdram, out + 0x0) += (frac * step(keyframe + 1, 0) - last_frac * step(prev_keyframe + 1, 0)) * root_track_scale;
     ram_f32_ref(rdram, out + 0x8) += (frac * step(keyframe + 1, 4) - last_frac * step(prev_keyframe + 1, 4)) * root_track_scale;
+}
+
+static int16_t& ram_s16_ref(uint8_t* rdram, uint32_t addr) {
+    return *reinterpret_cast<int16_t*>(rdram + ((addr - 0x80000000u) ^ 2));
+}
+
+// Audio frame size clamp (bug fix). The audio manager sizes each frame as frameSize - osAiGetLength()/4 + extra,
+// stored as s16, then clamps it to a minimum with an unsigned compare, so a negative size (more audio queued than a
+// frame) slips through and the next osAiSetNextBuffer gets a ~4 GB length. Hardware never reports that much queued
+// audio; the runtime's output queue can after a hitch. Clamp with a signed compare, as intended.
+extern "C" void mi_audio_clamp_frame_samples(uint8_t* rdram, uint32_t audio_info) {
+    constexpr uint32_t min_frame_samples = 0x800A519C;
+    int16_t& frame_samples = ram_s16_ref(rdram, audio_info + 0x4);
+    int32_t min_samples = static_cast<int32_t>(ram_u32(rdram, min_frame_samples));
+    if (frame_samples < min_samples) {
+        if (frame_samples < 0) {
+            static bool reported = false;
+            if (!reported) {
+                reported = true;
+                std::fprintf(stderr, "Audio: clamped a negative frame size (%d samples)\n", frame_samples);
+            }
+        }
+        frame_samples = static_cast<int16_t>(min_samples);
+    }
 }

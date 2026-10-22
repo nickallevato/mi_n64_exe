@@ -255,6 +255,16 @@ static uint32_t discarded_output_frames;
 constexpr uint32_t bytes_per_frame = input_channels * sizeof(float);
 
 void queue_samples(int16_t* audio_data, size_t sample_count) {
+    // The AI length register is 18 bits; anything longer is a bad length from the game (see
+    // mi_audio_clamp_frame_samples). Drop it rather than trying to allocate gigabytes.
+    if (sample_count > (0x40000 / sizeof(int16_t))) {
+        static bool reported = false;
+        if (!reported) {
+            reported = true;
+            fprintf(stderr, "Dropped an audio buffer with an invalid length (%zu samples)\n", sample_count);
+        }
+        return;
+    }
     mi::stats_on_audio(sample_count);
     // MI_AUDIO_DUMP=<file>: append the game's raw interleaved s16 output (for checking audio without listening).
     static FILE* audio_dump = std::getenv("MI_AUDIO_DUMP") ? std::fopen(std::getenv("MI_AUDIO_DUMP"), "wb") : nullptr;

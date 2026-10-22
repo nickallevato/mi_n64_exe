@@ -19,6 +19,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] All 20 levels load and run (scripts/level_test.sh: unlock, navigate, 20 s random play): 59-61 FPS, no
       crashes or stalls; Waterloo Station's full intro cutscene and sniper section play correctly
 - [ ] Full playthroughs of each mission (objectives, scripted events, endings)
+- [x] Audio crash (std::bad_alloc in queue_samples, hit in 2 of 5 level captures): the audio manager's minimum frame
+      size check is unsigned, so a negative size became a ~4 GB osAiSetNextBuffer length. Clamped with a signed compare.
 - [x] Music plays through the intro, menus and levels (confirmed by playtest; spectrograms of menu and level audio)
 - [x] Clean shutdown: quitting crashed 4/5 times (game threads ran on after game memory was unmapped); now 0/11 across
       intro, title and in-level quits
