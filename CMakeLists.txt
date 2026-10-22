@@ -71,6 +71,9 @@ set(SOURCES
     ${CMAKE_SOURCE_DIR}/src/main/register_overlays.cpp
     ${CMAKE_SOURCE_DIR}/src/main/debug_stats.cpp
 
+    ${CMAKE_SOURCE_DIR}/src/game/config.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/enhancements.cpp
+
 
     ${CMAKE_SOURCE_DIR}/rsp/n_aspMain.cpp
 )

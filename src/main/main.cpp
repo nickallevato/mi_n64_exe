@@ -43,6 +43,7 @@
 #include "librecomp/rsp.hpp"
 
 #include "mi_game.h"
+#include "mi_config.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -530,12 +531,7 @@ int main(int argc, char** argv) {
 
     recompinput::players::set_single_player_mode(true);
 
-    recompui::config::create_general_tab(recompui::config::GeneralTabOptions{});
-    recompui::config::create_graphics_tab();
-    recompui::config::create_sound_tab();
-    recompui::config::create_controls_tab();
-    recompui::config::create_mods_tab();
-    recompui::config::finalize();
+    mi::init_config();
 
     setup_autoboot();
 

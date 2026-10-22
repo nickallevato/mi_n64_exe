@@ -2,6 +2,7 @@
 //   MI_STATS=1   graphics tasks the game submitted, VIs (retraces) the runtime generated and audio samples queued.
 //   MI_WATCH=... game RAM words, as comma-separated "ADDR[:COUNT]" (hex). "*ADDR+OFF" reads the pointer at ADDR
 //                and adds OFF, e.g. "*0x8009FE38+0x6C:4" for 4 words starting at a struct field.
+//   MI_DUMP_DIR=dir  write the first 8 MB of game RAM to dir/ram_<second>.bin (native word order).
 #include <atomic>
 #include <chrono>
 #include <cstdio>
@@ -16,6 +17,7 @@ static std::atomic<uint32_t> gfx_tasks{0};
 static std::atomic<uint32_t> vis{0};
 static std::atomic<uint32_t> audio_samples{0};
 static const char* watch_spec = std::getenv("MI_WATCH");
+static const char* dump_dir = std::getenv("MI_DUMP_DIR");
 static uint8_t* stats_rdram = nullptr;
 
 void mi::stats_set_rdram(uint8_t* rdram) {
@@ -78,8 +80,17 @@ void mi::stats_on_audio(size_t sample_count) {
     audio_samples += static_cast<uint32_t>(sample_count);
 }
 
+static void dump_ram() {
+    static uint32_t index = 0;
+    std::string path = std::string(dump_dir) + "/ram_" + std::to_string(index++) + ".bin";
+    if (FILE* f = std::fopen(path.c_str(), "wb")) {
+        std::fwrite(stats_rdram, 1, 0x800000, f);
+        std::fclose(f);
+    }
+}
+
 void mi::stats_on_vi() {
-    if (!stats_enabled && watch_spec == nullptr) {
+    if (!stats_enabled && watch_spec == nullptr && dump_dir == nullptr) {
         return;
     }
     vis++;
@@ -93,6 +104,9 @@ void mi::stats_on_vi() {
         }
         if (watch_spec != nullptr) {
             print_watches();
+        }
+        if (dump_dir != nullptr && stats_rdram != nullptr) {
+            dump_ram();
         }
     }
 }

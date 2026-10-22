@@ -11,17 +11,19 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] App glue: RT64 renderer, SDL audio, ultramodern/librecomp, RecompFrontend launcher + config tabs
 - [x] Boot through intros to the save-select and difficulty menus
 - [x] Keyboard/controller input reaches the game (default bindings; menus navigate)
-- [ ] Audio playback
+- [x] Audio playback (n_aspMain via RSPRecomp, 22 kHz stereo)
 - [x] EEPROM detected (save-select screen loads)
 
 ## Phase 2: Playable
+- [x] Reach gameplay in the first mission (Ice Hit); movement works
 - [ ] Play through the first mission; fix crashes, rendering and audio issues as they appear
 - [ ] Name the game's main subsystems (scheduler, main loop, input, audio, renderer) in `symbols/manual.txt`
 - [ ] Rumble Pak / Controller Pak support
 - [ ] Remove waits on RCP hardware that the runtime doesn't need (as Zelda's `[[patches.instruction]]` do)
 
 ## Phase 3: Enhancements (Zelda64Recomp parity)
-- [ ] High framerate (frame interpolation needs matrix tagging patches, as Zelda's do)
+- [x] 60 FPS: the level loop's limiter (min 2 VIs/frame) is configurable; game logic runs on the VI clock so
+      speed is unchanged (verified by comparing 30/60 FPS runs). Graphics > Frame Rate, default 60.
 - [ ] Widescreen / ultrawide (RT64 aspect ratio plus patches for HUD and culling)
 - [ ] Dual analog camera
 - [ ] Gyro / mouse aim (the game has first-person aiming)

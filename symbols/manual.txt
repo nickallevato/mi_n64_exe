@@ -40,3 +40,8 @@ osEepromLongRead = 0x800754F0;
 Audio_CountActiveVoices = 0x8006F924;
 // Returns the held buttons of the first connected controller (0 if none).
 Input_GetButtons = 0x8006E530;
+// In-level main loop (gameplay and in-engine cutscenes): input, update, draw, then a frame limiter that waits
+// for at least 2 VIs since the previous frame (30 fps). Optional debug FPS print when D_800898F0 is set.
+Game_LevelLoop = 0x80047CF8;
+// Returns the retrace counter D_800A1F3C (139 callers use it as a clock).
+Sched_GetRetraceCount = 0x8006C364;

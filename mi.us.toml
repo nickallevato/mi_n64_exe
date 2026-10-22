@@ -10,6 +10,13 @@ functions_per_output_file = 50
 stubs = []
 ignored = []
 
+# In-level frame limiter: computes $v1 = last_frame_retrace + 1 and waits until retrace > $v1, i.e. at least
+# 2 VIs per frame (30 fps). Replace the +1 with (min VIs per frame - 1) from the app so the cap is configurable.
+[[patches.hook]]
+func = "Game_LevelLoop"
+before_vram = 0x80048170
+text = "{ int mi_level_min_vis_per_frame(void); ctx->r3 = ADD32(ctx->r17, mi_level_min_vis_per_frame() - 1); }"
+
 # Busy-wait loops. On hardware, interrupt-driven higher-priority threads preempt these loops; ultramodern
 # schedules game threads cooperatively, so each loop must yield while it's still waiting or it deadlocks.
 # Each hook runs right before the loop's branch and only yields when the branch is about to loop again.
