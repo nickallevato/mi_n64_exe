@@ -9,6 +9,34 @@
 
 #include "mi_config.h"
 
+static void add_general_options(recomp::config::Config &config) {
+    using EnumOptionVector = const std::vector<recomp::config::ConfigOptionEnumOption>;
+
+    static EnumOptionVector analog_camera_options = {
+        {mi::AnalogCamera::Off, "Off", "Off"},
+        {mi::AnalogCamera::On, "On", "On"},
+    };
+    config.add_enum_option(
+        mi::configkeys::general::analog_camera,
+        "Analog Camera",
+        "Turns Ethan (and the camera behind him) with the right stick, and tilts the first-person view. "
+        "<recomp-color primary>Off</recomp-color> matches the original controls.",
+        analog_camera_options,
+        mi::AnalogCamera::On
+    );
+    config.add_number_option(
+        mi::configkeys::general::analog_camera_speed,
+        "Analog Camera Speed",
+        "How fast the right stick turns Ethan, in degrees per second at full tilt.",
+        60, 360, 10, 0, false, 180
+    );
+    config.add_option_hidden_dependency(
+        mi::configkeys::general::analog_camera_speed,
+        mi::configkeys::general::analog_camera,
+        mi::AnalogCamera::Off
+    );
+}
+
 static void add_graphics_options(recomp::config::Config &config) {
     using EnumOptionVector = const std::vector<recomp::config::ConfigOptionEnumOption>;
 
@@ -32,6 +60,19 @@ T get_graphics_config_enum_value(const std::string& option_id) {
     return static_cast<T>(std::get<uint32_t>(recompui::config::get_graphics_config().get_option_value(option_id)));
 }
 
+template <typename T = uint32_t>
+T get_general_config_enum_value(const std::string& option_id) {
+    return static_cast<T>(std::get<uint32_t>(recompui::config::get_general_config().get_option_value(option_id)));
+}
+
+bool mi::get_analog_camera_enabled() {
+    return get_general_config_enum_value<mi::AnalogCamera>(mi::configkeys::general::analog_camera) == mi::AnalogCamera::On;
+}
+
+float mi::get_analog_camera_speed() {
+    return static_cast<float>(std::get<double>(recompui::config::get_general_config().get_option_value(mi::configkeys::general::analog_camera_speed)));
+}
+
 mi::FrameRate mi::get_frame_rate() {
     return get_graphics_config_enum_value<mi::FrameRate>(mi::configkeys::graphics::frame_rate);
 }
@@ -43,6 +84,12 @@ static void set_control_defaults() {
     set_default_mapping_for_keyboard(GameInput::Z, { mouse(SDL_BUTTON_LEFT), InputField::keyboard(SDL_SCANCODE_Q) });
     set_default_mapping_for_keyboard(GameInput::R, { mouse(SDL_BUTTON_RIGHT), InputField::keyboard(SDL_SCANCODE_E) });
     set_default_mapping_for_keyboard(GameInput::C_DOWN, { InputField::keyboard(SDL_SCANCODE_LCTRL), InputField::keyboard(SDL_SCANCODE_DOWN) });
+
+    // The right stick drives the analog camera, so keep it off the C buttons (sidestep/zoom/crouch).
+    set_default_mapping_for_controller(GameInput::C_LEFT, { InputField::controller_digital(SDL_CONTROLLER_BUTTON_NORTH) });
+    set_default_mapping_for_controller(GameInput::C_RIGHT, { InputField::controller_digital(SDL_CONTROLLER_BUTTON_EAST) });
+    set_default_mapping_for_controller(GameInput::C_UP, { InputField::controller_digital(SDL_CONTROLLER_BUTTON_RIGHTSTICK) });
+    set_default_mapping_for_controller(GameInput::C_DOWN, { InputField::controller_digital(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) });
 }
 
 static void set_control_descriptions() {
@@ -87,7 +134,8 @@ void mi::init_config() {
 
     recompui::config::GeneralTabOptions general_options{};
     general_options.has_mouse_sensitivity = true;
-    recompui::config::create_general_tab(general_options);
+    auto &general_config = recompui::config::create_general_tab(general_options);
+    add_general_options(general_config);
 
     auto &graphics_config = recompui::config::create_graphics_tab();
     add_graphics_options(graphics_config);

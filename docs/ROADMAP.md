@@ -25,7 +25,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] 60 FPS: the level loop's limiter (min 2 VIs/frame) is configurable; game logic runs on the VI clock so
       speed is unchanged (verified by comparing 30/60 FPS runs). Graphics > Frame Rate, default 60.
 - [ ] Widescreen / ultrawide (RT64 aspect ratio plus patches for HUD and culling)
-- [ ] Dual analog camera
+- [x] Analog camera: right stick turns Ethan (and the camera behind him) at a configurable rate and tilts the
+      first-person view; right stick removed from the C-button defaults. General > Analog Camera (default on)
 - [x] Keyboard + mouse: WASD move, mouse turns Ethan directly (writes his yaw), right mouse = R (first-person view,
       mouse moves the crosshair), left mouse = Z (shoot), Space = A, Shift = B, Ctrl = crouch. Cursor is captured in
       game; General > Mouse Sensitivity (default 50%).

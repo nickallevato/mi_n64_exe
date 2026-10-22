@@ -5,6 +5,10 @@
 
 namespace mi {
     namespace configkeys {
+        namespace general {
+            inline const std::string analog_camera = "analog_camera";
+            inline const std::string analog_camera_speed = "analog_camera_speed";
+        }
         namespace graphics {
             inline const std::string frame_rate = "frame_rate";
         }
@@ -15,8 +19,16 @@ namespace mi {
         Fps60,
     };
 
+    enum class AnalogCamera {
+        Off,
+        On,
+    };
+
     void init_config();
     FrameRate get_frame_rate();
+    bool get_analog_camera_enabled();
+    // Degrees per second at full right stick deflection.
+    float get_analog_camera_speed();
 }
 
 #endif
