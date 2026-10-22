@@ -1,6 +1,7 @@
 #ifndef __MI_GAME_H__
 #define __MI_GAME_H__
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 
@@ -10,6 +11,7 @@ namespace mi {
 
     void register_overlays();
     void stats_on_vi();
+    void stats_on_audio(size_t sample_count);
     void stats_set_rdram(uint8_t* rdram);
 }
 

@@ -38,6 +38,44 @@ func = "Gfx_WaitAllTasksDone"
 before_vram = 0x8006C30C
 text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
 
+# Wait for sound voices to stop (loops while Audio_CountActiveVoices() != 0; the audio thread stops them).
+[[patches.hook]]
+func = "func_8000D4B4"
+before_vram = 0x8000D4E8
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
+
+[[patches.hook]]
+func = "func_8000D50C"
+before_vram = 0x8000D540
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
+
+[[patches.hook]]
+func = "func_8000D5B0"
+before_vram = 0x8000D608
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
+
+[[patches.hook]]
+func = "func_8000D5B0"
+before_vram = 0x8000D66C
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
+
+[[patches.hook]]
+func = "func_8000D798"
+before_vram = 0x8000D7E8
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
+
+# Wait until A/B/Start are released (loops while Input_GetButtons() & 0xD000; the controller thread updates it).
+[[patches.hook]]
+func = "func_800463CC"
+before_vram = 0x80046640
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r2 != 0) yield_self_1ms(rdram); }"
+
+# Wait until an ID ($s1) leaves an active-ID table (rescans while found).
+[[patches.hook]]
+func = "func_8005A2A4"
+before_vram = 0x8005A304
+text = "{ void yield_self_1ms(uint8_t* rdram); if (ctx->r17 == ctx->r2) yield_self_1ms(rdram); }"
+
 # Development stats (MI_STATS=1): count submitted gfx tasks.
 [[patches.hook]]
 func = "Gfx_SubmitTask"

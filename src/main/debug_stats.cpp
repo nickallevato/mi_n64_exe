@@ -1,5 +1,5 @@
 // Development stats, printed once per second:
-//   MI_STATS=1   graphics tasks the game submitted and VIs (retraces) the runtime generated.
+//   MI_STATS=1   graphics tasks the game submitted, VIs (retraces) the runtime generated and audio samples queued.
 //   MI_WATCH=... game RAM words, as comma-separated "ADDR[:COUNT]" (hex). "*ADDR+OFF" reads the pointer at ADDR
 //                and adds OFF, e.g. "*0x8009FE38+0x6C:4" for 4 words starting at a struct field.
 #include <atomic>
@@ -14,6 +14,7 @@
 static const bool stats_enabled = std::getenv("MI_STATS") != nullptr;
 static std::atomic<uint32_t> gfx_tasks{0};
 static std::atomic<uint32_t> vis{0};
+static std::atomic<uint32_t> audio_samples{0};
 static const char* watch_spec = std::getenv("MI_WATCH");
 static uint8_t* stats_rdram = nullptr;
 
@@ -73,6 +74,10 @@ extern "C" void mi_stats_gfx_submit() {
     gfx_tasks++;
 }
 
+void mi::stats_on_audio(size_t sample_count) {
+    audio_samples += static_cast<uint32_t>(sample_count);
+}
+
 void mi::stats_on_vi() {
     if (!stats_enabled && watch_spec == nullptr) {
         return;
@@ -83,7 +88,8 @@ void mi::stats_on_vi() {
     if (now - last >= std::chrono::seconds(1)) {
         last = now;
         if (stats_enabled) {
-            fprintf(stderr, "[stats] gfx tasks/s: %u  VIs/s: %u\n", gfx_tasks.exchange(0), vis.exchange(0));
+            fprintf(stderr, "[stats] gfx tasks/s: %u  VIs/s: %u  audio samples/s: %u\n",
+                gfx_tasks.exchange(0), vis.exchange(0), audio_samples.exchange(0));
         }
         if (watch_spec != nullptr) {
             print_watches();

@@ -21,6 +21,15 @@ input_file="$out_dir/input.txt"
 : > "$input_file"
 
 sway_dir=$(mktemp -d)
+pid=""
+sway_pid=""
+# Never leave the game or compositor running, even if this script is killed (e.g. by timeout).
+cleanup() {
+    [[ -n "$pid" ]] && kill -9 "$pid" 2>/dev/null
+    [[ -n "$sway_pid" ]] && kill -9 "$sway_pid" 2>/dev/null
+    rm -rf "$sway_dir"
+}
+trap cleanup EXIT INT TERM
 printf 'output HEADLESS-1 resolution 1600x900\ndefault_border none\n' > "$sway_dir/config"
 WLR_BACKENDS=headless WLR_RENDERER=vulkan WLR_LIBINPUT_NO_DEVICES=1 WAYLAND_DISPLAY= DISPLAY= \
     sway --unsupported-gpu -d -c "$sway_dir/config" > "$sway_dir/sway.log" 2>&1 &
@@ -33,8 +42,8 @@ for _ in $(seq 1 40); do
     read -rt 0.25 <> <(:) || true
 done
 if [[ -z "$display" ]]; then
-    echo "sway failed to start; log: $sway_dir/sway.log"
-    kill -9 "$sway_pid" 2>/dev/null
+    echo "sway failed to start:"
+    tail -5 "$sway_dir/sway.log"
     exit 1
 fi
 
@@ -58,9 +67,4 @@ for i in $(seq 1 "$count"); do
     fi
 done
 
-kill -9 "$pid" 2>/dev/null  # the runtime ignores SIGTERM
-wait "$pid" 2>/dev/null
-kill -9 "$sway_pid" 2>/dev/null
-wait "$sway_pid" 2>/dev/null
-rm -rf "$sway_dir"
 ls "$out_dir"

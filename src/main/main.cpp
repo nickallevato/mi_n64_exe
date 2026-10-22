@@ -236,6 +236,7 @@ static uint32_t discarded_output_frames;
 constexpr uint32_t bytes_per_frame = input_channels * sizeof(float);
 
 void queue_samples(int16_t* audio_data, size_t sample_count) {
+    mi::stats_on_audio(sample_count);
     // Buffer for holding the output of swapping the audio channels. This is reused across
     // calls to reduce runtime allocations.
     static std::vector<float> swap_buffer;

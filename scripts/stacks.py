@@ -41,6 +41,8 @@ def main():
     pid = subprocess.run(["pgrep", "-x", "MIRecompiled"], capture_output=True, text=True).stdout.split()
     if not pid:
         sys.exit("MIRecompiled is not running")
+    if len(pid) > 1:
+        sys.exit(f"several MIRecompiled processes are running: {pid}")
     for i in range(samples):
         print(f"--- sample {i + 1}")
         for name, frames in sorted(sample(pid[0])):

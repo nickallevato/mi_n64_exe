@@ -36,3 +36,7 @@ Gfx_WaitAllTasksDone = 0x8006C2F0;
 // EEPROM long read (n64sym missed it): loops osEepromRead then waits on an osSetTimer delay, like
 // osEepromLongWrite right before it. The runtime replaces it; unreplaced, loading save data hangs.
 osEepromLongRead = 0x800754F0;
+// Counts entries of the 0x130-byte voice table D_800A3160 that are playing (flag bits in a0 select which).
+Audio_CountActiveVoices = 0x8006F924;
+// Returns the held buttons of the first connected controller (0 if none).
+Input_GetButtons = 0x8006E530;
