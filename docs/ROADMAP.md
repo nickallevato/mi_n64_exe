@@ -36,7 +36,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       game; General > Mouse Sensitivity (default 50%).
 - [x] Mouse/right stick in sniper mode (Waterloo Station, Mainland): added as stick deflection in
       Camera_SniperControl, verified panning in all directions in Waterloo Station
-- [ ] Player_AimControl (state 0x100000) mouse hooks: not reached in testing yet (not the sniper or R modes)
+- [x] Mouse aims the Gunboat turret (normal path; A/B-compared against a no-input run)
+- [ ] Player_AimControl (state 0x100000) mouse hooks: that state is only entered by a script command
+      (func_8003D844); not reached in any tested level
 - [ ] Low input lag (present-early mode is already on)
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
 - [x] Runs well on Linux/GNOME/NVIDIA: native Wayland, mailbox presentation (no freeze when hidden), <1 s
