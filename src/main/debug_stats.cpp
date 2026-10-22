@@ -9,6 +9,8 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <string>
 
@@ -106,6 +108,8 @@ void mi::stats_on_audio(size_t sample_count) {
     audio_samples += static_cast<uint32_t>(sample_count);
 }
 
+size_t get_queued_audio_bytes();
+
 static void dump_ram() {
     static uint32_t index = 0;
     std::string path = std::string(dump_dir) + "/ram_" + std::to_string(index++) + ".bin";
@@ -123,13 +127,17 @@ void mi::stats_on_vi() {
         return;
     }
     vis++;
+    // Track the lowest output queue level seen each second; 0 while audio is flowing means an underrun.
+    static size_t min_queued = SIZE_MAX;
+    min_queued = std::min(min_queued, get_queued_audio_bytes());
     static auto last = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
     if (now - last >= std::chrono::seconds(1)) {
         last = now;
         if (stats_enabled) {
-            fprintf(stderr, "[stats] gfx tasks/s: %u  VIs/s: %u  audio samples/s: %u\n",
-                gfx_tasks.exchange(0), vis.exchange(0), audio_samples.exchange(0));
+            fprintf(stderr, "[stats] gfx tasks/s: %u  VIs/s: %u  audio samples/s: %u  min audio queue: %zu bytes\n",
+                gfx_tasks.exchange(0), vis.exchange(0), audio_samples.exchange(0), min_queued);
+            min_queued = SIZE_MAX;
         }
         if (watch_spec != nullptr) {
             print_watches();

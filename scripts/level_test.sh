@@ -10,6 +10,7 @@ mkdir -p "$out"
 # GameShark level enablers (USA): one flag byte per level in the level table.
 unlock="0x8008A846=1,0x8008AB3E=1,0x8008A756=1,0x8008A77E=1,0x8008AB66=1,0x8008A5C6=1,0x8008A5DA=1,0x8008A602=1"
 unlock+=",0x8008AB52=1,0x8008A7CE=1,0x8008AB2A=1,0x8008A652=1,0x8008A666=1,0x8008A67A=1,0x8008A68E=1,0x8008A6A2=1"
+unlock+=",0x8008A6B6=11,0x8008A6CA=21,0x8008A7E2=11,0x8008A7F6=21,0x8008A706=11,0x8008A71A=41,0x8008A72E=21"
 cat > "$out/nav.sh" <<NAV
 set -u
 I=\$CAPTURE_DIR/input.txt
@@ -34,5 +35,5 @@ shot level_end
 NAV
 MI_POKE="$unlock" MI_STATS=1 CAPTURE_EXEC="bash $out/nav.sh" CAPTURE_EXEC_AT=4 \
     timeout $((120 + play)) scripts/capture.sh "$out" 3 4 > /dev/null 2>&1
-fps=$(grep stats "$out/game.log" | awk '{print $4}' | tail -$((play - 2)) | sort -n | awk '{a[NR]=$1} END {printf "min=%s median=%s", a[1], a[int(NR/2)+1]}')
+fps=$(grep stats "$out/game.log" | awk '{print $4}' | tail -$((play - 2)) | sort -n | awk '{a[NR]=$1; if ($1 == 0) z++} END {printf "min=%s median=%s zero_seconds=%d", a[1], a[int(NR/2)+1], z}')
 echo "mission=$mission level=$level fatal=$(grep -c Fatal "$out/game.log") $fps"

@@ -256,6 +256,12 @@ constexpr uint32_t bytes_per_frame = input_channels * sizeof(float);
 
 void queue_samples(int16_t* audio_data, size_t sample_count) {
     mi::stats_on_audio(sample_count);
+    // MI_AUDIO_DUMP=<file>: append the game's raw interleaved s16 output (for checking audio without listening).
+    static FILE* audio_dump = std::getenv("MI_AUDIO_DUMP") ? std::fopen(std::getenv("MI_AUDIO_DUMP"), "wb") : nullptr;
+    if (audio_dump != nullptr) {
+        std::fwrite(audio_data, sizeof(int16_t), sample_count, audio_dump);
+        std::fflush(audio_dump);
+    }
     // Buffer for holding the output of swapping the audio channels. This is reused across
     // calls to reduce runtime allocations.
     static std::vector<float> swap_buffer;
@@ -318,6 +324,10 @@ void queue_samples(int16_t* audio_data, size_t sample_count) {
     // Queue the swapped audio data.
     // Offset the data start by only half the discarded frame count as the other half of the discarded frames are at the end of the buffer.
     SDL_QueueAudio(audio_device, samples_to_queue, num_bytes_to_queue);
+}
+
+size_t get_queued_audio_bytes() {
+    return SDL_GetQueuedAudioSize(audio_device);
 }
 
 size_t get_frames_remaining() {
