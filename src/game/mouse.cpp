@@ -87,6 +87,7 @@ static float& ram_float(uint8_t* rdram, uint32_t addr) {
 
 constexpr uint32_t player_object_ptr = 0x80093D58; // Pointer to Ethan's object; yaw (degrees) at +0x44.
 constexpr uint32_t player_state_flags = 0x80093EF4;
+constexpr uint32_t retrace_counter = 0x800A1F3C; // VIs since boot; the game's clock.
 constexpr uint32_t player_state_aiming = 0x100000;  // Player_AimControl handles the mouse while this is set.
 constexpr uint32_t player_state_first_person = 0x4; // R held: first-person view, stick Y tilts the view.
 // Player_Control only reads the stick while the player has control (0x80) and it isn't suspended (0x800).
@@ -140,11 +141,13 @@ extern "C" void mi_mouse_player_control(uint8_t* rdram) {
     }
     float yaw_radians = take(pending_x) * sensitivity_scale();
 
-    // Analog camera: the right stick turns Ethan at a fixed rate, timed by wall clock so it's frame rate independent.
-    static auto last_frame = std::chrono::steady_clock::now();
-    auto now = std::chrono::steady_clock::now();
-    float frame_seconds = std::min(std::chrono::duration<float>(now - last_frame).count(), 0.1f);
-    last_frame = now;
+    // Analog camera: the right stick turns Ethan at a fixed rate. Time it by game time (VIs since the last frame), not
+    // wall clock: every frame shows exactly that much game time, while the wall-clock gap between frames jitters by a
+    // few ms, which made turning visibly uneven.
+    static uint32_t last_retrace = ram_word(rdram, retrace_counter);
+    uint32_t retrace = ram_word(rdram, retrace_counter);
+    float frame_seconds = std::min(static_cast<float>(retrace - last_retrace), 6.0f) / 60.0f;
+    last_retrace = retrace;
     if (mi::get_analog_camera_enabled() && !recompinput::game_input_disabled()) {
         float rx, ry;
         get_right_analog(&rx, &ry);
