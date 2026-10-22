@@ -631,5 +631,8 @@ int main(int argc, char** argv) {
     timeEndPeriod(1);
 #endif
 
-    return EXIT_SUCCESS;
+    // Exit without running static destructors: the game's threads are still running and use runtime and audio state
+    // that those destructors would tear down. Saves are already written (the runtime joins its saving thread).
+    std::fflush(nullptr);
+    std::_Exit(EXIT_SUCCESS);
 }

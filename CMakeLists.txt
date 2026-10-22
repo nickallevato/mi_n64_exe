@@ -49,6 +49,8 @@ endfunction()
 # Prefer mailbox presentation: FIFO acquisition blocks while the window is hidden on some drivers (NVIDIA + Wayland),
 # which stalls the renderer and with it the game.
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/plume ${CMAKE_SOURCE_DIR}/patches/deps/plume-prefer-mailbox.patch)
+# Keep game memory mapped at quit: the game's threads are never joined and crash if it's unmapped under them.
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime ${CMAKE_SOURCE_DIR}/patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
 

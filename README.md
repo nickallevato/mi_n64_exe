@@ -101,9 +101,7 @@ MI_ROM="rom/Mission Impossible (USA).z64" build/app/MIRecompiled   # boot straig
 
 ## Status
 
-All 20 levels load and play; full playthroughs haven't been verified yet. Known issues:
-- Music: only the start of the first track plays (being investigated).
-- The app can crash while quitting. Your save isn't affected.
+All 20 levels load and play, with music. Full playthroughs haven't been verified yet.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for what's done and what's next: full playthroughs, Rumble Pak,
 packaging, mod support and texture packs.
@@ -144,6 +142,9 @@ RSPRecomp.
   available; a hidden window keeps running at 60 FPS with normal CPU/GPU use.
 - **Startup**: SDL audio is initialized before the file-dialog library, and the dialog uses the XDG portal
   instead of in-process GTK; either ordering issue or GTK init could stall startup for 25+ s.
+- **Quitting**: the game's threads are never joined, so the app keeps game memory mapped
+  (`patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch`) and exits without static destructors once saves are
+  written. Before this, quitting crashed in 4 of 5 tries.
 
 </details>
 

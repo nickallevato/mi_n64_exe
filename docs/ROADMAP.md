@@ -19,8 +19,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] All 20 levels load and run (scripts/level_test.sh: unlock, navigate, 20 s random play): 59-61 FPS, no
       crashes or stalls; Waterloo Station's full intro cutscene and sniper section play correctly
 - [ ] Full playthroughs of each mission (objectives, scripted events, endings)
-- [ ] Music: only the start of the first track plays; later tracks never start
-- [ ] Clean shutdown: closing the window can crash (game threads keep running while the app tears down)
+- [x] Music plays through the intro, menus and levels (confirmed by playtest; spectrograms of menu and level audio)
+- [x] Clean shutdown: quitting crashed 4/5 times (game threads ran on after game memory was unmapped); now 0/11 across
+      intro, title and in-level quits
 - [ ] Name the game's main subsystems (scheduler, main loop, input, audio, renderer) in `symbols/manual.txt`
 - [ ] Rumble Pak / Controller Pak support
 - [ ] Remove waits on RCP hardware that the runtime doesn't need (as Zelda's `[[patches.instruction]]` do)
