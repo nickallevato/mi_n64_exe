@@ -175,10 +175,11 @@ N64ModernRuntime can provide its own implementations.
 
 ## Yes, AI wrote this
 
-This port was made with AI: Claude did the reverse engineering, the runtime fixes, the controls and this README,
-and a human pointed it at the game and played it. It's in the commit history, and we're not going to apologize for
-it. Before this project, *Mission: Impossible* had no decomp, no recomp and no PC port. Something that runs at
-60 FPS with mouse aiming beats nothing.
+Claude did the reverse engineering, the runtime fixes, the mouse aim and this README. A human aimed it at the game
+and played it. It's all in the commit history. No apologies.
+
+Before this, *Mission: Impossible* had no decomp, no recomp and no PC port. For 28 years, nobody did it by hand.
+Now it runs at 60 FPS with mouse aim. That beats nothing.
 
 **Thank you** to the people who built the foundation by hand, over years, so a project like this could happen
 in days:
@@ -195,8 +196,8 @@ in days:
 - Everyone in the N64 decomp scene who mapped out libultra, the microcodes and the hardware by hand. Every
   function name the tools recognized here traces back to your work.
 
-You did the hard, original part. The grunt work of applying it game by game (naming thousands of functions, chasing
-busy-wait loops, wiring up mouse aim) is something we can now do on our own subscription and our own inference,
-so you don't have to. You're welcome to it: fork it, borrow from it, or ignore it.
+You did the hard, original part. The grunt work of applying it game by game is ours now: naming thousands of
+functions, chasing busy-wait loops, wiring up mouse aim. We'll burn our own subscription and inference on it so you
+don't have to spend your weekends on it. You're welcome. Fork it, borrow from it, or ignore it.
 
 *Mission: Impossible* is © its respective owners. This project contains no game assets.
