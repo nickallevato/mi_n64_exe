@@ -1,0 +1,30 @@
+diff --git a/src/hle/rt64_game_frame.cpp b/src/hle/rt64_game_frame.cpp
+index 87392d0..60f45f6 100644
+--- a/src/hle/rt64_game_frame.cpp
++++ b/src/hle/rt64_game_frame.cpp
+@@ -569,7 +569,11 @@ namespace RT64 {
+                     const uint32_t prevVertexIndex = prevWorkload.drawData.faceIndices[prevCall.meshDesc.faceIndicesStart];
+                     const uint32_t curLookAtIndex = curWorkload.drawData.lookAtIndices[curVertexIndex] >> RSP_LOOKAT_INDEX_SHIFT;
+                     const uint32_t prevLookAtIndex = prevWorkload.drawData.lookAtIndices[prevVertexIndex] >> RSP_LOOKAT_INDEX_SHIFT;
+-                    lookAtCheckSet.emplace(curLookAtIndex, prevLookAtIndex);
++
++                    // A game that never loads a look at has no look at entries, but the indices still read 0.
++                    if ((curLookAtIndex < curWorkload.drawData.rspLookAt.size()) && (prevLookAtIndex < prevWorkload.drawData.rspLookAt.size())) {
++                        lookAtCheckSet.emplace(curLookAtIndex, prevLookAtIndex);
++                    }
+                 }
+             }
+         }
+@@ -684,6 +688,12 @@ namespace RT64 {
+ 
+         // Check for look at matches.
+         for (const IndexPair &indices : lookAtCheckSet) {
++            // The maps are sized for the scene's first workload, which other projections' look at indices may exceed.
++            if ((indices.first >= firstCurWorkloadMap.lookAt.size()) || (indices.second >= firstCurWorkloadMap.prevLookAtMapped.size()) ||
++                (indices.first >= firstCurWorkload.drawData.rspLookAt.size()) || (indices.second >= firstPrevWorkload.drawData.rspLookAt.size())) {
++                continue;
++            }
++
+             if (firstCurWorkloadMap.lookAt[indices.first].mapped) {
+                 continue;
+             }

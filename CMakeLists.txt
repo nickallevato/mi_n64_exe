@@ -50,6 +50,9 @@ endfunction()
 # would stall the game. RT64 skips presenting while the last present hasn't reached the screen (via present wait).
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64/src/contrib/plume ${CMAKE_SOURCE_DIR}/patches/deps/plume-wait-for-last-present.patch)
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-skip-present-while-hidden.patch)
+# Frame matching read look at entries that don't exist when the game hasn't loaded a look at (crash on environment
+# mapped surfaces, e.g. the Embassy right after MI_LEVEL warps into it).
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-lookat-bounds.patch)
 # Keep game memory mapped at quit: the game's threads are never joined and crash if it's unmapped under them.
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime ${CMAKE_SOURCE_DIR}/patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch)
 
