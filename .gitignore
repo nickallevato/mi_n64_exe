@@ -15,3 +15,4 @@ split/n64sym*.txt
 syms.toml
 *.log
 rsp/
+__pycache__/
