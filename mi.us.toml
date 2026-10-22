@@ -29,6 +29,36 @@ func = "Burp_Load"
 before_vram = 0x80068E64
 text = "{ void mi_override_entry(uint8_t*, uint32_t, uint32_t); if (ctx->r2 != 0 && ctx->r18 != 0) mi_override_entry(rdram, (uint32_t)ctx->r18, (uint32_t)ctx->r19); }"
 
+# Debug level warp (src/game/level_warp.cpp): MI_LEVEL=<mission>,<stage> boots straight into a stage. Game_ThreadMain
+# calls it after boot init, before the front end loop; it sets up the menus' state and calls Game_RunMission.
+[[patches.hook]]
+func = "Game_ThreadMain"
+before_vram = 0x80048A98
+text = "{ void mi_level_warp(uint8_t*, recomp_context*); mi_level_warp(rdram, ctx); }"
+
+# While warping, Game_RunMission skips the mission intro scene ($v0 = play it), the OBJECTIVES/BRIEFING/TEAM menu
+# (returns 1 = play) and the objectives screen at the start of the stage (Game_LevelLoop mode bit 2, $a2).
+[[patches.hook]]
+func = "Game_RunMission"
+before_vram = 0x800499CC
+text = "{ int mi_level_warp_skip_menus(void); if (mi_level_warp_skip_menus()) ctx->r2 = 0; }"
+
+[[patches.hook]]
+func = "Mission_BriefingMenu"
+before_vram = 0x80049870
+text = "{ int mi_level_warp_skip_menus(void); if (mi_level_warp_skip_menus()) { ctx->r2 = 1; return; } }"
+
+[[patches.hook]]
+func = "Game_RunMission"
+before_vram = 0x80049AE0
+text = "{ int mi_level_warp_skip_menus(void); if (mi_level_warp_skip_menus()) ctx->r6 &= ~(gpr)2; }"
+
+# The warped stage is starting: later stages of the mission play with their normal menus.
+[[patches.hook]]
+func = "Game_LevelLoop"
+before_vram = 0x80047CF8
+text = "{ void mi_level_warp_level_started(void); mi_level_warp_level_started(); }"
+
 # Development: MI_DMA_LOG=file logs every Rom_Read(src, dst, size) call (src/main/debug_stats.cpp).
 [[patches.hook]]
 func = "Rom_Read"

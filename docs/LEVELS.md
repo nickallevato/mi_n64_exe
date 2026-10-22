@@ -51,6 +51,27 @@ Verified in game (Embassy Function): `--tint` recolours all level geometry; `--r
 ballroom walls and doorway taller. Props (piano, vases) are separate models and stay unchanged, and collision is
 separate data, so geometry edits are visual only.
 
+### Level warp (`MI_LEVEL`)
+
+`MI_LEVEL=<mission>,<stage>[,<difficulty>]` boots straight into a stage, skipping the logos, intro, title, save
+select, difficulty and mission menus, the pre-mission OBJECTIVES/BRIEFING/TEAM screens and the objectives screen at
+the start of the stage. Indices are those of `scripts/levels/level_table.py` (missions in menu order, stage = index in
+the mission's stage list, hidden entries included); difficulty 0 = POSSIBLE (default), 1 = IMPOSSIBLE. A stage name
+also works: `MI_LEVEL="Train roof"` (first match, case-insensitive) or `MI_LEVEL="Ice Storm/Subpen"`.
+
+```sh
+MI_LEVEL=1,0 MI_OVERRIDE_DIR=build/mods/embassy_red build/app/MIRecompiled   # Recover NOC List: Embassy Function
+```
+
+The stage is on screen within 3 seconds of boot; the level's own scripted opening (camera flythrough, dialogue) still
+plays. How it works (`src/game/level_warp.cpp`): a hook in `Game_ThreadMain`, before the front end, sets the state
+the menus would with no save device (all save slots unused, so the warp never writes to the EEPROM), the
+difficulty, `CurMission` and `CurStage`, then calls `Game_RunMission` like the mission menu does. The rest of the
+mission plays normally (later stages get their usual menus); when it ends or Ethan dies, the game goes back to the
+logos and title screen. Continuation stages (flags 0x20/0x40) load and play on their own, but without any state the
+previous part would have set up (not checked in detail); a scene (0x80) plays and then the mission continues with the
+next stage. An invalid value is logged and the game boots normally.
+
 ## Toward a level mod
 
 What works: decoding every archive, exporting any level's geometry with textures, knowing where each level's blocks

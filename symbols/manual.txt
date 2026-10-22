@@ -212,3 +212,41 @@ GeoBank = 0x80096000;
 GeoBankRoot = 0x80096004;
 // UI string table (text archive entry 0).
 UIStrings = 0x800A9508;
+
+// ==== Front end (title, save select, difficulty, mission menus); see src/game/level_warp.cpp ====
+// Title flow, looped forever by Game_ThreadMain: controller/Rumble Pak check, the intro scene (TitleSceneStage), then
+// "PRESS START", which runs the save select (through the menu table D_8008A020).
+FrontEnd_Title = 0x8004E47C;
+// Controller and Rumble Pak check at boot ("No controller in controller socket 1", "RUMBLE PAK detected").
+FrontEnd_ControllerCheck = 0x80048CEC;
+// Save slot select (Select / Copy / Delete, 4 slots). Without a save device it goes straight to the difficulty menu
+// (D_8008A030); otherwise it applies the chosen slot's profile (Save_ApplyProfile) first.
+FrontEnd_SaveSelect = 0x8004EAD0;
+// Difficulty menu (POSSIBLE / IMPOSSIBLE, table D_8008A060: 8-byte rows of handler + name). On A: Difficulty_Set,
+// Progress_ApplyUnlocks, then the row's handler (Game_MissionSelect for both).
+FrontEnd_DifficultySelect = 0x800490AC;
+// Pre-mission menu run by Game_RunMission before the first stage: OBJECTIVES, BRIEFING, TEAM screens. Returns 0 if the
+// player backs out (Game_RunMission then returns), 1 to play.
+Mission_BriefingMenu = 0x80049870;
+// Save slots: Save_ProbeSlots marks all 4 slots of D_80095FE8 unused (-1) and returns D_80095FE0 (save device present);
+// Save_SetCurrentSlot(i) sets D_80095FE4; Save_IsSlotUsed(i); Save_GetProfile returns the current slot's 0x20-byte
+// profile (D_80095F60 + slot * 0x20); Save_WriteProfile writes it back, or returns -1 if the slot is unused.
+Save_ProbeSlots = 0x80046368;
+Save_SetCurrentSlot = 0x80046398;
+Save_IsSlotUsed = 0x800463AC;
+Save_GetProfile = 0x8004634C;
+Save_WriteProfile = 0x800462B8;
+// Applies the current profile's settings (audio, difficulty at +0xA, ...) and clears the stage unlock bits (0x07).
+Save_ApplyProfile = 0x8004F794;
+// Recomputes the stage unlock flags from the current profile and difficulty, then saves the profile (Save_WriteProfile).
+Progress_ApplyUnlocks = 0x8004FCA8;
+// Difficulty (D_8008AF20): 0 = POSSIBLE, 1 = IMPOSSIBLE.
+Difficulty_Set = 0x80055228;
+Difficulty_Get = 0x80055234;
+Difficulty = 0x8008AF20;
+// Set to 1 after a menu choice; menus ignore A/B/Start until all three are released, then clear it.
+Input_WaitRelease = 0x8008AC2A;
+// Save slot table (4 x s32, -1 = unused), current slot index, save device present flag.
+SaveSlots = 0x80095FE8;
+CurSaveSlot = 0x80095FE4;
+SaveDevicePresent = 0x80095FE0;
