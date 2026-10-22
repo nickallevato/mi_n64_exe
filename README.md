@@ -93,8 +93,10 @@ Dev tools:
 - **libultra functions n64sym missed** are named in `symbols/manual.txt` so the runtime replaces them (AI, SI,
   EEPROM long read, ...). An unreplaced libultra function that waits on hardware hangs or crashes.
 - **Wayland**: on a Wayland session the app uses native Wayland. Through XWayland, NVIDIA's Vulkan presentation
-  stalls (the game runs at ~0-2 fps). Presentation also blocks while the window is fully hidden, which pauses
-  the game until it's shown again.
+  stalls (the game runs at ~0-2 fps).
+- **Hidden windows**: FIFO presentation blocks while the window is hidden (NVIDIA + Wayland), freezing the game.
+  `patches/deps/plume-prefer-mailbox.patch` (applied to RT64's plume by CMake) uses mailbox presentation when
+  available; a hidden window keeps running at 60 FPS with normal CPU/GPU use.
 - **Startup**: SDL audio is initialized before the file-dialog library, and the dialog uses the XDG portal
   instead of in-process GTK; either ordering issue or GTK init could stall startup for 25+ s.
 
