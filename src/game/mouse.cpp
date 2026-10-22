@@ -15,6 +15,7 @@
 
 namespace {
     std::mutex mouse_mutex;
+    std::chrono::steady_clock::time_point last_take{};
     float test_right_x = 0.0f;
     float test_right_y = 0.0f;
     float pending_x = 0.0f;
@@ -36,6 +37,7 @@ namespace {
         std::lock_guard lock{ mouse_mutex };
         float value = pending;
         pending = 0.0f;
+        last_take = std::chrono::steady_clock::now();
         return value;
     }
 }
@@ -64,6 +66,10 @@ void mi::mouse_on_poll(float test_dx, float test_dy) {
         // A menu has the mouse; don't let its motion turn the player afterwards.
         pending_x = pending_y = 0.0f;
         return;
+    }
+    // Motion nobody consumed recently (menus, cutscenes) is stale: drop it so it can't snap the view later.
+    if (std::chrono::steady_clock::now() - last_take > std::chrono::milliseconds(100)) {
+        pending_x = pending_y = 0.0f;
     }
     // Bound the backlog so a stall can't produce a huge snap.
     pending_x = std::clamp(pending_x + dx, -4000.0f, 4000.0f);
@@ -121,9 +127,8 @@ void mi::mouse_adjust_stick(float* x, float* y) {
 extern "C" void mi_mouse_player_control(uint8_t* rdram) {
     uint32_t flags = ram_word(rdram, player_state_flags);
     if (!player_has_control(flags)) {
-        // Dialogue or a scripted moment: discard motion instead of applying it when control returns.
-        take(pending_x);
-        take(pending_y);
+        // Dialogue, a scripted moment, or sniper mode (handled by mi_mouse_sniper_stick). Unconsumed motion goes
+        // stale in mouse_on_poll, so it can't snap the view when control returns.
         return;
     }
     if (flags & player_state_aiming) {
@@ -152,6 +157,39 @@ extern "C" void mi_mouse_player_control(uint8_t* rdram) {
     }
     float yaw = ram_float(rdram, player + 0x44) - yaw_radians * (180.0f / 3.14159265f);
     ram_float(rdram, player + 0x44) = std::fmod(yaw + 360.0f, 360.0f);
+}
+
+// Stick deflection (N64 units, +-80 max) per mouse count in sniper mode at 100% sensitivity.
+constexpr float sniper_stick_per_count = 4.0f;
+
+static uint8_t& ram_byte(uint8_t* rdram, uint32_t addr) {
+    return rdram[(addr - 0x80000000u) ^ 3];
+}
+
+// Sniper mode (the camera code in func_80015048) only pans the scope with the stick, which it has just read into
+// two s8 values at sp+0x10 (x) and sp+0x11 (y). Add this frame's mouse motion and the right stick as deflection.
+extern "C" void mi_mouse_sniper_stick(uint8_t* rdram, uint32_t sp) {
+    float scale = recompui::config::general::has_mouse_sensitivity_option()
+        ? static_cast<float>(recompui::config::general::get_mouse_sensitivity()) / 100.0f : 0.0f;
+    float dx = take(pending_x) * sniper_stick_per_count * scale;
+    // The scope looks down for positive stick Y, so mouse down (positive y) maps to positive stick Y.
+    float dy = take(pending_y) * sniper_stick_per_count * scale;
+    if (mi::get_analog_camera_enabled()) {
+        float rx, ry;
+        get_right_analog(&rx, &ry);
+        dx += rx * 80.0f;
+        dy += ry * 80.0f;
+    }
+    if (dx == 0.0f && dy == 0.0f) {
+        return;
+    }
+    auto add = [](int8_t value, float delta) {
+        return static_cast<uint8_t>(static_cast<int8_t>(std::clamp(value + delta, -80.0f, 80.0f)));
+    };
+    uint8_t& x = ram_byte(rdram, sp + 0x10);
+    uint8_t& y = ram_byte(rdram, sp + 0x11);
+    x = add(static_cast<int8_t>(x), dx);
+    y = add(static_cast<int8_t>(y), dy);
 }
 
 // Aim yaw change in radians (positive turns left, like the game's angle convention).

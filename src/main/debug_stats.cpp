@@ -3,6 +3,8 @@
 //   MI_WATCH=... game RAM words, as comma-separated "ADDR[:COUNT]" (hex). "*ADDR+OFF" reads the pointer at ADDR
 //                and adds OFF, e.g. "*0x8009FE38+0x6C:4" for 4 words starting at a struct field.
 //   MI_DUMP_DIR=dir  write the first 8 MB of game RAM to dir/ram_<second>.bin (native word order).
+// Applied every VI rather than once per second:
+//   MI_POKE=ADDR=VALUE,...  GameShark-style byte writes (hex), e.g. "0x8008A846=1" enables a level.
 #include <atomic>
 #include <chrono>
 #include <cstdio>
@@ -18,7 +20,27 @@ static std::atomic<uint32_t> vis{0};
 static std::atomic<uint32_t> audio_samples{0};
 static const char* watch_spec = std::getenv("MI_WATCH");
 static const char* dump_dir = std::getenv("MI_DUMP_DIR");
+static const char* poke_spec = std::getenv("MI_POKE");
 static uint8_t* stats_rdram = nullptr;
+
+static void apply_pokes() {
+    std::string spec = poke_spec;
+    size_t start = 0;
+    while (start < spec.size()) {
+        size_t end = spec.find(',', start);
+        std::string item = spec.substr(start, end == std::string::npos ? std::string::npos : end - start);
+        start = end == std::string::npos ? spec.size() : end + 1;
+        size_t eq = item.find('=');
+        if (eq == std::string::npos) {
+            continue;
+        }
+        uint32_t offset = static_cast<uint32_t>(std::strtoul(item.c_str(), nullptr, 16)) - 0x80000000u;
+        if (offset < 0x800000u) {
+            // Bytes are stored with the address XOR'd by 3 (words are in native order).
+            stats_rdram[offset ^ 3] = static_cast<uint8_t>(std::strtoul(item.c_str() + eq + 1, nullptr, 16));
+        }
+    }
+}
 
 void mi::stats_set_rdram(uint8_t* rdram) {
     stats_rdram = rdram;
@@ -94,6 +116,9 @@ static void dump_ram() {
 }
 
 void mi::stats_on_vi() {
+    if (poke_spec != nullptr && stats_rdram != nullptr) {
+        apply_pokes();
+    }
     if (!stats_enabled && watch_spec == nullptr && dump_dir == nullptr) {
         return;
     }

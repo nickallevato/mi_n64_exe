@@ -23,6 +23,13 @@ func = "Player_Control"
 before_vram = 0x8003EC10
 text = "{ void mi_mouse_player_control(uint8_t* rdram); mi_mouse_player_control(rdram); }"
 
+# Sniper mode (Waterloo Station, Mainland): the scope pans only with the stick, which func_80015048 has just read
+# into sp+0x10/sp+0x11. Add mouse motion and the right stick there (src/game/mouse.cpp).
+[[patches.hook]]
+func = "Camera_SniperControl"
+before_vram = 0x80015070
+text = "{ void mi_mouse_sniper_stick(uint8_t* rdram, uint32_t sp); mi_mouse_sniper_stick(rdram, (uint32_t)ctx->r29); }"
+
 # Mouse aiming (src/game/mouse.cpp). In the aim handler, $f8 holds Ethan's body yaw in radians just before it's
 # converted to degrees and stored, and $f22 holds the aim pitch in radians just before it's stored.
 [[patches.hook]]

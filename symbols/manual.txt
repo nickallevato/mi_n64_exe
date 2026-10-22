@@ -57,3 +57,5 @@ Object_SetYaw = 0x80003B8C;
 Object_UpdateAll = 0x800020E8;
 // Reads controller pad stick into s8 x/y (clamped to +-80).
 Input_GetStick = 0x8006E480;
+// Sniper scope control (Waterloo Station, Mainland): reads the stick and pans the scope; part of the camera update.
+Camera_SniperControl = 0x80015048;

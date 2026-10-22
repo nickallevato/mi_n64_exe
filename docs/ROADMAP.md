@@ -30,7 +30,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] Keyboard + mouse: WASD move, mouse turns Ethan directly (writes his yaw), right mouse = R (first-person view,
       mouse moves the crosshair), left mouse = Z (shoot), Space = A, Shift = B, Ctrl = crouch. Cursor is captured in
       game; General > Mouse Sensitivity (default 50%).
-- [ ] Mouse in the 0x100000 aim mode (Player_AimControl; hooked but not yet reached in testing)
+- [x] Mouse/right stick in sniper mode (Waterloo Station, Mainland): added as stick deflection in
+      Camera_SniperControl, verified panning in all directions in Waterloo Station
+- [ ] Player_AimControl (state 0x100000) mouse hooks: not reached in testing yet (not the sniper or R modes)
 - [ ] Low input lag (present-early mode is already on)
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
 - [ ] Linux packaging (Flatpak/AppImage) and Windows builds
