@@ -173,9 +173,30 @@ N64ModernRuntime can provide its own implementations.
 
 </details>
 
-## Credits
+## Yes, AI wrote this
 
-Built on [N64Recomp](https://github.com/N64Recomp/N64Recomp), [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime),
-[RT64](https://github.com/rt64/rt64) and [RecompFrontend](https://github.com/N64Recomp/RecompFrontend) by Mr-Wiseguy,
-Dario and contributors. Feature targets follow [Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp).
-*Mission: Impossible* is © its respective owners; this project contains no game assets.
+This port was made with AI: Claude did the reverse engineering, the runtime fixes, the controls and this README,
+and a human pointed it at the game and played it. It's in the commit history, and we're not going to apologize for
+it. Before this project, *Mission: Impossible* had no decomp, no recomp and no PC port. Something that runs at
+60 FPS with mouse aiming beats nothing.
+
+**Thank you** to the people who built the foundation by hand, over years, so a project like this could happen
+in days:
+- **Mr-Wiseguy**, for [N64Recomp](https://github.com/N64Recomp/N64Recomp),
+  [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) and
+  [Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp). They proved static recompilation of N64 games
+  works and set the bar for what a PC port should feel like.
+- **Dario**, for [RT64](https://github.com/rt64/rt64), which is why this looks good at any resolution.
+- The [RecompFrontend](https://github.com/N64Recomp/RecompFrontend) and
+  [BanjoRecomp](https://github.com/BanjoRecomp/BanjoRecomp) contributors, for the launcher, menus and input layer
+  this app is built on.
+- **ethteck** and contributors for [splat](https://github.com/ethteck/splat), and **shygoo** for
+  [n64sym](https://github.com/shygoo/n64sym).
+- Everyone in the N64 decomp scene who mapped out libultra, the microcodes and the hardware by hand. Every
+  function name the tools recognized here traces back to your work.
+
+You did the hard, original part. The grunt work of applying it game by game (naming thousands of functions, chasing
+busy-wait loops, wiring up mouse aim) is something we can now do on our own subscription and our own inference,
+so you don't have to. You're welcome to it: fork it, borrow from it, or ignore it.
+
+*Mission: Impossible* is © its respective owners. This project contains no game assets.
