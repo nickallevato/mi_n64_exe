@@ -16,7 +16,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 
 ## Phase 2: Playable
 - [x] Reach gameplay in the first mission (Ice Hit); movement works
-- [ ] Play through the first mission; fix crashes, rendering and audio issues as they appear
+- [x] All 20 levels load and run (scripts/level_test.sh: unlock, navigate, 20 s random play): 59-61 FPS, no
+      crashes or stalls; Waterloo Station's full intro cutscene and sniper section play correctly
+- [ ] Full playthroughs of each mission (objectives, scripted events, endings)
 - [ ] Name the game's main subsystems (scheduler, main loop, input, audio, renderer) in `symbols/manual.txt`
 - [ ] Rumble Pak / Controller Pak support
 - [ ] Remove waits on RCP hardware that the runtime doesn't need (as Zelda's `[[patches.instruction]]` do)
@@ -24,7 +26,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 ## Phase 3: Enhancements (Zelda64Recomp parity)
 - [x] 60 FPS: the level loop's limiter (min 2 VIs/frame) is configurable; game logic runs on the VI clock so
       speed is unchanged (verified by comparing 30/60 FPS runs). Graphics > Frame Rate, default 60.
-- [ ] Widescreen / ultrawide (RT64 aspect ratio plus patches for HUD and culling)
+- [x] Upgraded graphics: RT64 renders at window resolution with MSAA and widescreen "Expand" by default
+      (compared against native 240p 4:3 at the same moment). HUD stays 16:9-clamped.
+- [ ] Ultrawide polish (culling at extreme aspect ratios not checked)
 - [x] Analog camera: right stick turns Ethan (and the camera behind him) at a configurable rate and tilts the
       first-person view; right stick removed from the C-button defaults. General > Analog Camera (default on)
 - [x] Keyboard + mouse: WASD move, mouse turns Ethan directly (writes his yaw), right mouse = R (first-person view,
@@ -35,6 +39,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [ ] Player_AimControl (state 0x100000) mouse hooks: not reached in testing yet (not the sniper or R modes)
 - [ ] Low input lag (present-early mode is already on)
 - [ ] Instant load times (ROM DMA is already instant in the runtime)
+- [x] Runs well on Linux/GNOME/NVIDIA: native Wayland, mailbox presentation (no freeze when hidden), <1 s
+      startup, ~22% CPU, 3-minute random-input soak without issues, identical audio at 30/60 FPS
 - [ ] Linux packaging (Flatpak/AppImage) and Windows builds
 
 ## Phase 4: Mods
