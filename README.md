@@ -40,6 +40,32 @@ cmake --build build/n64recomp --target N64Recomp RSPRecomp
 scripts/recomp.sh
 ```
 
+## Playing
+
+Status: boots, runs through menus and missions at 60 FPS, with keyboard/mouse and an analog camera. See
+[docs/ROADMAP.md](docs/ROADMAP.md).
+
+| Action | Keyboard / mouse | Controller |
+|---|---|---|
+| Move | W A S D | Left stick |
+| Turn Ethan / camera | Mouse | Right stick (General > Analog Camera) |
+| First-person view / aim (hold) | Right mouse, E | Right trigger |
+| Shoot / punch | Left mouse, Q | Left trigger |
+| Action / jump | Space | A |
+| Inventory (weapons) | Left Shift | X |
+| Crouch, item inventory | Left Ctrl, Down | Right shoulder |
+| Sidestep while aiming | Left / Right arrows | Y / B |
+| Zoom while aiming | Up | Right stick click |
+| Camera mode | (unbound) | Left shoulder |
+| Rotate camera | J / L | D-pad |
+| Pause / IMF menu | Enter | Start |
+
+Everything can be rebound under Controls. Settings that matter here:
+- **Graphics > Frame Rate**: 60 FPS (default) or Original (30). The game times its logic by the video clock, so
+  60 FPS doesn't change game speed. Resolution, MSAA and aspect ratio are RT64's options on the same tab.
+- **General > Mouse Sensitivity**: 0 turns mouse turning off (and releases the cursor).
+- **General > Analog Camera / Analog Camera Speed**.
+
 ## Building and running the app
 
 Uses the BanjoRecomp app layout: RT64 renderer, N64ModernRuntime, and RecompFrontend (launcher, config
