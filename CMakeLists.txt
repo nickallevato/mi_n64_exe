@@ -94,6 +94,7 @@ set(SOURCES
     ${CMAKE_SOURCE_DIR}/src/game/config.cpp
     ${CMAKE_SOURCE_DIR}/src/game/enhancements.cpp
     ${CMAKE_SOURCE_DIR}/src/game/mouse.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/overrides.cpp
 
 
     ${CMAKE_SOURCE_DIR}/rsp/n_aspMain.cpp

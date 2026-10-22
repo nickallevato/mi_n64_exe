@@ -34,15 +34,31 @@ All python3 (`python3 -I`), run from the repo root:
 | `scripts/levels/rommap.py <capture>` | Annotate a capture's ROM read log with archive, entry and role |
 | `scripts/level_capture.sh` | Capture a level headlessly: ROM read log (`MI_DMA_LOG`), RAM dump and screenshots |
 
+## Loading edited data (overrides)
+
+`MI_OVERRIDE_DIR=dir` makes the game load `dir/rom_XXXXXXXX.bin` in place of the archive entry whose data starts at
+ROM address `XXXXXXXX` (as listed by `scripts/levels/burp.py`). The file is the decoded entry in big-endian byte order
+and, for now, must be the same size as the original. Hooks at the end of `Burp_LoadTo` and `Burp_Load` copy it over
+the decoded data before the game relocates or reads it (`src/game/overrides.cpp`); the game log says when one is
+applied. `scripts/levels/level_mod.py` makes same-size geometry edits:
+
+```sh
+python3 -I scripts/levels/level_mod.py --rom "rom/Mission Impossible (USA).z64" --entry 5 --tint 1.0,0.35,0.35 -o build/mods/embassy_red
+MI_OVERRIDE_DIR=build/mods/embassy_red build/app/MIRecompiled
+```
+
+Verified in game (Embassy Function): `--tint` recolours all level geometry; `--raise-above 450 --by 500` makes the
+ballroom walls and doorway taller. Props (piano, vases) are separate models and stay unchanged, and collision is
+separate data, so geometry edits are visual only.
+
 ## Toward a level mod
 
-What works: decoding every archive, exporting any level's geometry with textures, and knowing where each level's
-blocks live. What's next:
+What works: decoding every archive, exporting any level's geometry with textures, knowing where each level's blocks
+live, and loading edited same-size geometry in game. What's next:
 
 1. An encoder from an edited mesh back to the geometry format (cells, k-d trees, display lists that cull on their
    bounding box, 32-vertex batches, texture loads), then recompress.
-2. Runtime injection: the app rejects a modified ROM file (hash check), so a mod would swap a block when its
-   archive is opened (patch the in-RAM entry table to point at modified data in RAM; `Rom_Read` and the inflater
-   accept RAM sources).
+2. Overrides of a different size: patch the entry's decoded size when its archive is opened, so the game allocates
+   room for the edited block.
 3. Collision (not found yet), prop models (`.DOF`), and the SOOL script format for objectives and events.
 4. The N64Recomp mod pipeline (`.nrm` mods) to package it.

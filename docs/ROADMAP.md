@@ -60,7 +60,9 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 ## Phase 4: Mods
 - [x] Level groundwork: level table, Burp archives (raw DEFLATE), load sequence and geometry format decoded;
       `scripts/levels/level_export.py` exports any level to OBJ + textures (docs/LEVELS.md)
-- [ ] Level geometry encoder (edited mesh -> cells, k-d trees, display lists) and runtime block injection
+- [x] Runtime data overrides (MI_OVERRIDE_DIR): edited archive entries load in place of the ROM's; same-size geometry
+      edits verified in game (recoloured and taller Embassy)
+- [ ] Level geometry encoder (edited mesh -> cells, k-d trees, display lists) and different-size overrides
 - [ ] Collision, prop (.DOF) models and the SOOL level script format
 - [ ] Patches pipeline: `patches/` C compiled for MIPS, recompiled with `patches.toml` (like Banjo's PatchesLib)
 - [ ] Export the symbol file for mod authors (`RecompModTool`, a `.nrm` template)

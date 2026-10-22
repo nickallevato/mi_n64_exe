@@ -17,6 +17,18 @@ func = "Game_LevelLoop"
 before_vram = 0x80048170
 text = "{ int mi_level_min_vis_per_frame(void); ctx->r3 = ADD32(ctx->r17, mi_level_min_vis_per_frame() - 1); }"
 
+# Data overrides (src/game/overrides.cpp): after an archive entry is decoded ($s2 = entry, $s3 = buffer,
+# $v0 = success), MI_OVERRIDE_DIR can replace its contents with an edited file.
+[[patches.hook]]
+func = "Burp_LoadTo"
+before_vram = 0x80068CD4
+text = "{ void mi_override_entry(uint8_t*, uint32_t, uint32_t); if (ctx->r2 != 0 && ctx->r18 != 0) mi_override_entry(rdram, (uint32_t)ctx->r18, (uint32_t)ctx->r19); }"
+
+[[patches.hook]]
+func = "Burp_Load"
+before_vram = 0x80068E64
+text = "{ void mi_override_entry(uint8_t*, uint32_t, uint32_t); if (ctx->r2 != 0 && ctx->r18 != 0) mi_override_entry(rdram, (uint32_t)ctx->r18, (uint32_t)ctx->r19); }"
+
 # Development: MI_DMA_LOG=file logs every Rom_Read(src, dst, size) call (src/main/debug_stats.cpp).
 [[patches.hook]]
 func = "Rom_Read"
