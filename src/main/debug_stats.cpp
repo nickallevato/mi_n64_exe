@@ -3,6 +3,8 @@
 //   MI_WATCH=... game RAM words, as comma-separated "ADDR[:COUNT]" (hex). "*ADDR+OFF" reads the pointer at ADDR
 //                and adds OFF, e.g. "*0x8009FE38+0x6C:4" for 4 words starting at a struct field.
 //   MI_DUMP_DIR=dir  write the first 8 MB of game RAM to dir/ram_<second>.bin (native word order).
+//   MI_DMA_LOG=file  log every Rom_Read call: retrace, ROM/RAM source, RAM destination, size and the two calling
+//                    recompiled functions (from a native backtrace; the recompiled code doesn't keep $ra).
 //   MI_FRAMETIMES=file  log a timestamp (us) per VI ("V <us>") and per gfx task submit ("G <us>"), for frame pacing.
 // Applied every VI rather than once per second:
 //   MI_POKE=ADDR=VALUE,...  GameShark-style byte writes (hex), e.g. "0x8008A846=1" enables a level.
@@ -14,6 +16,8 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+
+#include <execinfo.h>
 
 #include "mi_game.h"
 
@@ -108,6 +112,30 @@ static void print_watches() {
 }
 
 // Called from a recompiler hook at the start of the game's gfx task submit function (see mi.us.toml).
+// Called from a recompiler hook at the start of Rom_Read(src, dst, size) (see mi.us.toml).
+extern "C" void mi_stats_rom_read(uint32_t src, uint32_t dst, uint32_t size, uint32_t) {
+    static FILE* dma_log = std::getenv("MI_DMA_LOG") ? std::fopen(std::getenv("MI_DMA_LOG"), "w") : nullptr;
+    if (dma_log == nullptr) {
+        return;
+    }
+    uint32_t retrace = 0;
+    read_word(0x800A1F3C, retrace);
+    // Frames: this function, Rom_Read, its caller, that function's caller.
+    void* frames[4];
+    int count = backtrace(frames, 4);
+    std::string callers;
+    if (char** names = backtrace_symbols(frames, count)) {
+        for (int i = 2; i < count; i++) {
+            std::string name = names[i];
+            size_t open = name.find('('), plus = name.find('+', open);
+            callers += " " + (open != std::string::npos && plus != std::string::npos ? name.substr(open + 1, plus - open - 1) : std::string("?"));
+        }
+        std::free(names);
+    }
+    std::fprintf(dma_log, "%u %08X %08X %08X%s\n", retrace, src, dst, size, callers.c_str());
+    std::fflush(dma_log);
+}
+
 extern "C" void mi_stats_gfx_submit() {
     if (frametimes != nullptr) {
         log_frametime('G');

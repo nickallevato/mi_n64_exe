@@ -76,3 +76,6 @@ Anim_GetRootDelta = 0x80005B7C;
 // Audio manager frame (like libultra's __amHandleFrameMsg): queues the previous frame's samples with
 // osAiSetNextBuffer, sizes this frame from osAiGetLength (min D_800A519C), builds and sends the audio task.
 Audio_HandleFrame = 0x800726E4;
+// Rom_Read(src, dst, size): copies size bytes from cartridge ROM offset src (PI DMA in chunks of D_8008E530) to RAM
+// dst; a RAM source (0x8xxxxxxx) is a plain copy.
+Rom_Read = 0x80068638;

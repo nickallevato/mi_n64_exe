@@ -17,6 +17,12 @@ func = "Game_LevelLoop"
 before_vram = 0x80048170
 text = "{ int mi_level_min_vis_per_frame(void); ctx->r3 = ADD32(ctx->r17, mi_level_min_vis_per_frame() - 1); }"
 
+# Development: MI_DMA_LOG=file logs every Rom_Read(src, dst, size) call (src/main/debug_stats.cpp).
+[[patches.hook]]
+func = "Rom_Read"
+before_vram = 0x80068638
+text = "{ void mi_stats_rom_read(uint32_t, uint32_t, uint32_t, uint32_t); mi_stats_rom_read((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r6, (uint32_t)ctx->r31); }"
+
 # Smooth root motion at 60 fps (src/game/enhancements.cpp): walking moves characters one animation keyframe step at
 # a time, and at 60 fps many frames don't reach a new keyframe. At the common exit ($t1 = animation state, $t3 = out
 # vector, X/Z already stored), add the partial step for the fraction of a keyframe played.
