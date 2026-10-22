@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" width="1200" height="860" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="1200" height="860" rx="18" fill="#0e1217"/>
+<text x="40" y="56" font-size="26" fill="#e8edf3" font-weight="800" text-anchor="start" letter-spacing="3">MISSION: IMPOSSIBLE</text>
+<text x="40" y="82" font-size="15" fill="#97a3b3" font-weight="400" text-anchor="start" >Default controls · rebind anything in the Controls menu (Esc)</text>
+<rect x="24" y="104" width="1152" height="384" rx="14" fill="#151b23"/>
+<text x="48" y="138" font-size="13" fill="#97a3b3" font-weight="700" text-anchor="start" letter-spacing="2">KEYBOARD + MOUSE</text>
+<rect x="48" y="160" width="46" height="46" rx="8" fill="#94a3b8" fill-opacity="0.16" stroke="#94a3b8" stroke-width="2"/>
+<text x="71.0" y="188.0" font-size="15" fill="#94a3b8" font-weight="700" text-anchor="middle" >Esc</text>
+<rect x="48" y="212" width="70" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="83.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >Tab</text>
+<rect x="124" y="212" width="46" height="46" rx="8" fill="#f87171" fill-opacity="0.16" stroke="#f87171" stroke-width="2"/>
+<text x="147.0" y="240.0" font-size="15" fill="#f87171" font-weight="700" text-anchor="middle" >Q</text>
+<rect x="176" y="212" width="46" height="46" rx="8" fill="#2dd4bf" fill-opacity="0.16" stroke="#2dd4bf" stroke-width="2"/>
+<text x="199.0" y="240.0" font-size="15" fill="#2dd4bf" font-weight="700" text-anchor="middle" >W</text>
+<rect x="228" y="212" width="46" height="46" rx="8" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24" stroke-width="2"/>
+<text x="251.0" y="240.0" font-size="15" fill="#fbbf24" font-weight="700" text-anchor="middle" >E</text>
+<rect x="280" y="212" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="303.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >R</text>
+<rect x="332" y="212" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="355.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >T</text>
+<rect x="384" y="212" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="407.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >Y</text>
+<rect x="436" y="212" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="459.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >U</text>
+<rect x="488" y="212" width="46" height="46" rx="8" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<text x="511.0" y="240.0" font-size="15" fill="#c084fc" font-weight="700" text-anchor="middle" >I</text>
+<rect x="540" y="212" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="563.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >O</text>
+<rect x="592" y="212" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="615.0" y="240.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >P</text>
+<rect x="48" y="264" width="82" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="89.0" y="292.0" font-size="11" fill="#5b6878" font-weight="500" text-anchor="middle" >Caps</text>
+<rect x="136" y="264" width="46" height="46" rx="8" fill="#2dd4bf" fill-opacity="0.16" stroke="#2dd4bf" stroke-width="2"/>
+<text x="159.0" y="292.0" font-size="15" fill="#2dd4bf" font-weight="700" text-anchor="middle" >A</text>
+<rect x="188" y="264" width="46" height="46" rx="8" fill="#2dd4bf" fill-opacity="0.16" stroke="#2dd4bf" stroke-width="2"/>
+<text x="211.0" y="292.0" font-size="15" fill="#2dd4bf" font-weight="700" text-anchor="middle" >S</text>
+<rect x="240" y="264" width="46" height="46" rx="8" fill="#2dd4bf" fill-opacity="0.16" stroke="#2dd4bf" stroke-width="2"/>
+<text x="263.0" y="292.0" font-size="15" fill="#2dd4bf" font-weight="700" text-anchor="middle" >D</text>
+<rect x="292" y="264" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="315.0" y="292.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >F</text>
+<rect x="344" y="264" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="367.0" y="292.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >G</text>
+<rect x="396" y="264" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="419.0" y="292.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >H</text>
+<rect x="448" y="264" width="46" height="46" rx="8" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<text x="471.0" y="292.0" font-size="15" fill="#c084fc" font-weight="700" text-anchor="middle" >J</text>
+<rect x="500" y="264" width="46" height="46" rx="8" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<text x="523.0" y="292.0" font-size="15" fill="#c084fc" font-weight="700" text-anchor="middle" >K</text>
+<rect x="552" y="264" width="46" height="46" rx="8" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<text x="575.0" y="292.0" font-size="15" fill="#c084fc" font-weight="700" text-anchor="middle" >L</text>
+<rect x="604" y="264" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="627.0" y="292.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >;</text>
+<rect x="48" y="316" width="110" height="46" rx="8" fill="#60a5fa" fill-opacity="0.16" stroke="#60a5fa" stroke-width="2"/>
+<text x="103.0" y="344.0" font-size="12" fill="#60a5fa" font-weight="700" text-anchor="middle" >Shift</text>
+<rect x="164" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="187.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >Z</text>
+<rect x="216" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="239.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >X</text>
+<rect x="268" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="291.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >C</text>
+<rect x="320" y="316" width="46" height="46" rx="8" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<text x="343.0" y="344.0" font-size="15" fill="#c084fc" font-weight="700" text-anchor="middle" >V</text>
+<rect x="372" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="395.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >B</text>
+<rect x="424" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="447.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >N</text>
+<rect x="476" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="499.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >M</text>
+<rect x="528" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="551.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >,</text>
+<rect x="580" y="316" width="46" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="603.0" y="344.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >.</text>
+<rect x="48" y="368" width="70" height="46" rx="8" fill="#60a5fa" fill-opacity="0.16" stroke="#60a5fa" stroke-width="2"/>
+<text x="83.0" y="396.0" font-size="12" fill="#60a5fa" font-weight="700" text-anchor="middle" >Ctrl</text>
+<rect x="124" y="368" width="58" height="46" rx="8" fill="#1d2530" stroke="#2b3542"/>
+<text x="153.0" y="396.0" font-size="13" fill="#5b6878" font-weight="500" text-anchor="middle" >Alt</text>
+<rect x="188" y="368" width="330" height="46" rx="8" fill="#60a5fa" fill-opacity="0.16" stroke="#60a5fa" stroke-width="2"/>
+<text x="353.0" y="396.0" font-size="12" fill="#60a5fa" font-weight="700" text-anchor="middle" >Space</text>
+<rect x="656" y="264" width="92" height="46" rx="8" fill="#94a3b8" fill-opacity="0.16" stroke="#94a3b8" stroke-width="2"/>
+<text x="702.0" y="292.0" font-size="12" fill="#94a3b8" font-weight="700" text-anchor="middle" >Enter</text>
+<rect x="690" y="316" width="46" height="46" rx="8" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24" stroke-width="2"/>
+<text x="713.0" y="344.0" font-size="15" fill="#fbbf24" font-weight="700" text-anchor="middle" >↑</text>
+<rect x="638" y="368" width="46" height="46" rx="8" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24" stroke-width="2"/>
+<text x="661.0" y="396.0" font-size="15" fill="#fbbf24" font-weight="700" text-anchor="middle" >←</text>
+<rect x="690" y="368" width="46" height="46" rx="8" fill="#60a5fa" fill-opacity="0.16" stroke="#60a5fa" stroke-width="2"/>
+<text x="713.0" y="396.0" font-size="15" fill="#60a5fa" font-weight="700" text-anchor="middle" >↓</text>
+<rect x="742" y="368" width="46" height="46" rx="8" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24" stroke-width="2"/>
+<text x="765.0" y="396.0" font-size="15" fill="#fbbf24" font-weight="700" text-anchor="middle" >→</text>
+<path d="M850 240 C850 180 870 170 910 170 C950 170 970 180 970 240 L970 320 C970 370 945 392 910 392 C875 392 850 370 850 320 Z" fill="#1d2530" stroke="#2b3542" stroke-width="2"/>
+<path d="M908 172 C872 174 853 184 852 242 L908 242 Z" fill="#f87171" fill-opacity="0.22" stroke="#f87171" stroke-width="2"/>
+<path d="M912 172 C948 174 967 184 968 242 L912 242 Z" fill="#fbbf24" fill-opacity="0.22" stroke="#fbbf24" stroke-width="2"/>
+<rect x="904" y="190" width="12" height="30" rx="6" fill="#2b3542"/>
+<text x="880" y="218" font-size="16" fill="#f87171" font-weight="800" text-anchor="middle" >L</text>
+<text x="940" y="218" font-size="16" fill="#fbbf24" font-weight="800" text-anchor="middle" >R</text>
+<path d="M910 268 L917 280 L903 280 Z" fill="#2dd4bf"/>
+<path d="M952 310 L940 317 L940 303 Z" fill="#2dd4bf"/>
+<path d="M910 352 L903 340 L917 340 Z" fill="#2dd4bf"/>
+<path d="M868 310 L880 303 L880 317 Z" fill="#2dd4bf"/>
+<circle cx="910" cy="310" r="5" fill="#2dd4bf"/>
+<path d="M962 206 L1000 190" stroke="#fbbf24" stroke-width="1.5" fill="none"/>
+<circle cx="962" cy="206" r="3" fill="#fbbf24"/>
+<text x="1008" y="191" font-size="15" fill="#e8edf3" font-weight="700" text-anchor="start" >Hold: aim</text>
+<text x="1008" y="210" font-size="12.5" fill="#97a3b3" font-weight="400" text-anchor="start" >first-person view</text>
+<path d="M858 206 L820 190" stroke="#f87171" stroke-width="1.5" fill="none"/>
+<circle cx="858" cy="206" r="3" fill="#f87171"/>
+<text x="812" y="191" font-size="15" fill="#e8edf3" font-weight="700" text-anchor="end" >Shoot</text>
+<text x="812" y="210" font-size="12.5" fill="#97a3b3" font-weight="400" text-anchor="end" >or punch</text>
+<path d="M970 290 L1000 310" stroke="#2dd4bf" stroke-width="1.5" fill="none"/>
+<circle cx="970" cy="290" r="3" fill="#2dd4bf"/>
+<text x="1008" y="311" font-size="15" fill="#e8edf3" font-weight="700" text-anchor="start" >Move mouse</text>
+<text x="1008" y="330" font-size="12.5" fill="#97a3b3" font-weight="400" text-anchor="start" >turn Ethan · aim</text>
+<rect x="48" y="418" width="10" height="10" rx="3" fill="#2dd4bf"/>
+<text x="66" y="428" font-size="13" fill="#2dd4bf" font-weight="700" text-anchor="start" >WASD</text>
+<text x="122" y="428" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Move</text>
+<rect x="234" y="418" width="10" height="10" rx="3" fill="#f87171"/>
+<text x="252" y="428" font-size="13" fill="#f87171" font-weight="700" text-anchor="start" >Q</text>
+<text x="308" y="428" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Shoot</text>
+<rect x="420" y="418" width="10" height="10" rx="3" fill="#fbbf24"/>
+<text x="438" y="428" font-size="13" fill="#fbbf24" font-weight="700" text-anchor="start" >E</text>
+<text x="494" y="428" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Hold: aim</text>
+<rect x="606" y="418" width="10" height="10" rx="3" fill="#60a5fa"/>
+<text x="624" y="428" font-size="13" fill="#60a5fa" font-weight="700" text-anchor="start" >Space</text>
+<text x="680" y="428" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Action / jump</text>
+<rect x="792" y="418" width="10" height="10" rx="3" fill="#60a5fa"/>
+<text x="810" y="428" font-size="13" fill="#60a5fa" font-weight="700" text-anchor="start" >Shift</text>
+<text x="866" y="428" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Weapons</text>
+<rect x="978" y="418" width="10" height="10" rx="3" fill="#60a5fa"/>
+<text x="996" y="428" font-size="13" fill="#60a5fa" font-weight="700" text-anchor="start" >Ctrl  ↓</text>
+<text x="1052" y="428" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Crouch / items</text>
+<rect x="48" y="444" width="10" height="10" rx="3" fill="#fbbf24"/>
+<text x="66" y="454" font-size="13" fill="#fbbf24" font-weight="700" text-anchor="start" >← →</text>
+<text x="122" y="454" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Sidestep (aiming)</text>
+<rect x="234" y="444" width="10" height="10" rx="3" fill="#fbbf24"/>
+<text x="252" y="454" font-size="13" fill="#fbbf24" font-weight="700" text-anchor="start" >↑</text>
+<text x="308" y="454" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Zoom (aiming)</text>
+<rect x="420" y="444" width="10" height="10" rx="3" fill="#c084fc"/>
+<text x="438" y="454" font-size="13" fill="#c084fc" font-weight="700" text-anchor="start" >J L</text>
+<text x="494" y="454" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Rotate camera</text>
+<rect x="606" y="444" width="10" height="10" rx="3" fill="#c084fc"/>
+<text x="624" y="454" font-size="13" fill="#c084fc" font-weight="700" text-anchor="start" >V</text>
+<text x="680" y="454" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Camera mode</text>
+<rect x="792" y="444" width="10" height="10" rx="3" fill="#94a3b8"/>
+<text x="810" y="454" font-size="13" fill="#94a3b8" font-weight="700" text-anchor="start" >Enter</text>
+<text x="866" y="454" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Pause / IMF</text>
+<rect x="978" y="444" width="10" height="10" rx="3" fill="#94a3b8"/>
+<text x="996" y="454" font-size="13" fill="#94a3b8" font-weight="700" text-anchor="start" >Esc</text>
+<text x="1052" y="454" font-size="13" fill="#e8edf3" font-weight="500" text-anchor="start" >Settings</text>
+<rect x="24" y="504" width="1152" height="332" rx="14" fill="#151b23"/>
+<text x="48" y="538" font-size="13" fill="#97a3b3" font-weight="700" text-anchor="start" letter-spacing="2">CONTROLLER</text>
+<path d="M450 594 C540 578 660 578 750 594 C810 604 836 704 830 766 C824 814 770 814 740 770 C710 728 660 714 600 714 C540 714 490 728 460 770 C430 814 376 814 370 766 C364 704 390 604 450 594 Z" fill="#1d2530" stroke="#2b3542" stroke-width="2"/>
+<rect x="410" y="546" width="80" height="22" rx="11.0" fill="#f87171" fill-opacity="0.18" stroke="#f87171" stroke-width="2"/>
+<text x="450.0" y="562.0" font-size="13" fill="#f87171" font-weight="800" text-anchor="middle" >LT</text>
+<rect x="710" y="546" width="80" height="22" rx="11.0" fill="#fbbf24" fill-opacity="0.18" stroke="#fbbf24" stroke-width="2"/>
+<text x="750.0" y="562.0" font-size="13" fill="#fbbf24" font-weight="800" text-anchor="middle" >RT</text>
+<rect x="414" y="572" width="72" height="18" rx="9.0" fill="#c084fc" fill-opacity="0.18" stroke="#c084fc" stroke-width="2"/>
+<text x="450.0" y="586.0" font-size="13" fill="#c084fc" font-weight="800" text-anchor="middle" >LB</text>
+<rect x="714" y="572" width="72" height="18" rx="9.0" fill="#60a5fa" fill-opacity="0.18" stroke="#60a5fa" stroke-width="2"/>
+<text x="750.0" y="586.0" font-size="13" fill="#60a5fa" font-weight="800" text-anchor="middle" >RB</text>
+<circle cx="460" cy="648" r="26" fill="#2dd4bf" fill-opacity="0.16" stroke="#2dd4bf" stroke-width="2"/>
+<circle cx="460" cy="648" r="15" fill="#2b3542"/>
+<text x="460" y="653" font-size="12" fill="#2dd4bf" font-weight="800" text-anchor="middle" >L</text>
+<circle cx="670" cy="684" r="26" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<circle cx="670" cy="684" r="15" fill="#2b3542"/>
+<text x="670" y="689" font-size="12" fill="#c084fc" font-weight="800" text-anchor="middle" >R</text>
+<path d="M522 658 h16 v18 h18 v16 h-18 v18 h-16 v-18 h-18 v-16 h18 Z" fill="#c084fc" fill-opacity="0.16" stroke="#c084fc" stroke-width="2"/>
+<circle cx="740" cy="670" r="12" fill="#60a5fa" fill-opacity="0.18" stroke="#60a5fa" stroke-width="2"/>
+<text x="740" y="674.5" font-size="12" fill="#60a5fa" font-weight="800" text-anchor="middle" >A</text>
+<circle cx="762" cy="648" r="12" fill="#fbbf24" fill-opacity="0.18" stroke="#fbbf24" stroke-width="2"/>
+<text x="762" y="652.5" font-size="12" fill="#fbbf24" font-weight="800" text-anchor="middle" >B</text>
+<circle cx="718" cy="648" r="12" fill="#60a5fa" fill-opacity="0.18" stroke="#60a5fa" stroke-width="2"/>
+<text x="718" y="652.5" font-size="12" fill="#60a5fa" font-weight="800" text-anchor="middle" >X</text>
+<circle cx="740" cy="626" r="12" fill="#fbbf24" fill-opacity="0.18" stroke="#fbbf24" stroke-width="2"/>
+<text x="740" y="630.5" font-size="12" fill="#fbbf24" font-weight="800" text-anchor="middle" >Y</text>
+<rect x="604" y="630" width="26" height="12" rx="6" fill="#94a3b8" fill-opacity="0.5"/>
+<rect x="570" y="630" width="26" height="12" rx="6" fill="#94a3b8" fill-opacity="0.25"/>
+<text x="583" y="622" font-size="11" fill="#94a3b8" font-weight="700" text-anchor="middle" >Back</text>
+<text x="617" y="622" font-size="11" fill="#94a3b8" font-weight="700" text-anchor="middle" >Start</text>
+<text x="600" y="766" font-size="13" fill="#97a3b3" font-weight="500" text-anchor="middle" >Start: pause / IMF menu  ·  Back: settings</text>
+<path d="M410 557 L340 572.0 L300 572.0" stroke="#f87171" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="410" cy="557" r="3" fill="#f87171"/>
+<text x="292" y="568.0" font-size="14" fill="#f87171" font-weight="700" text-anchor="end" >LT</text>
+<text x="292" y="586.0" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="end" >Shoot / punch</text>
+<path d="M414 581 L340 652.6666666666666 L300 652.6666666666666" stroke="#c084fc" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="414" cy="581" r="3" fill="#c084fc"/>
+<text x="292" y="648.6666666666666" font-size="14" fill="#c084fc" font-weight="700" text-anchor="end" >LB</text>
+<text x="292" y="666.6666666666666" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="end" >Camera mode</text>
+<path d="M434 648 L340 733.3333333333334 L300 733.3333333333334" stroke="#2dd4bf" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="434" cy="648" r="3" fill="#2dd4bf"/>
+<text x="292" y="729.3333333333334" font-size="14" fill="#2dd4bf" font-weight="700" text-anchor="end" >Left stick</text>
+<text x="292" y="747.3333333333334" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="end" >Move</text>
+<path d="M504 684 L340 814.0 L300 814.0" stroke="#c084fc" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="504" cy="684" r="3" fill="#c084fc"/>
+<text x="292" y="810.0" font-size="14" fill="#c084fc" font-weight="700" text-anchor="end" >D-pad ← →</text>
+<text x="292" y="828.0" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="end" >Rotate camera</text>
+<path d="M790 557 L860 572.0 L900 572.0" stroke="#fbbf24" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="790" cy="557" r="3" fill="#fbbf24"/>
+<text x="908" y="568.0" font-size="14" fill="#fbbf24" font-weight="700" text-anchor="start" >RT (hold)</text>
+<text x="908" y="586.0" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="start" >Aim · first-person view</text>
+<path d="M786 581 L860 632.5 L900 632.5" stroke="#60a5fa" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="786" cy="581" r="3" fill="#60a5fa"/>
+<text x="908" y="628.5" font-size="14" fill="#60a5fa" font-weight="700" text-anchor="start" >RB</text>
+<text x="908" y="646.5" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="start" >Crouch / items</text>
+<path d="M752 670 L860 693.0 L900 693.0" stroke="#60a5fa" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="752" cy="670" r="3" fill="#60a5fa"/>
+<text x="908" y="689.0" font-size="14" fill="#60a5fa" font-weight="700" text-anchor="start" >A / X</text>
+<text x="908" y="707.0" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="start" >Action / jump · Weapons</text>
+<path d="M774 648 L860 753.5 L900 753.5" stroke="#fbbf24" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="774" cy="648" r="3" fill="#fbbf24"/>
+<text x="908" y="749.5" font-size="14" fill="#fbbf24" font-weight="700" text-anchor="start" >Y / B</text>
+<text x="908" y="767.5" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="start" >Sidestep while aiming</text>
+<path d="M696 684 L860 814.0 L900 814.0" stroke="#c084fc" stroke-opacity="0.55" stroke-width="1.3" fill="none"/>
+<circle cx="696" cy="684" r="3" fill="#c084fc"/>
+<text x="908" y="810.0" font-size="14" fill="#c084fc" font-weight="700" text-anchor="start" >Right stick</text>
+<text x="908" y="828.0" font-size="12.5" fill="#e8edf3" font-weight="400" text-anchor="start" >Turn Ethan (click: zoom)</text>
+</svg>

@@ -19,6 +19,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] All 20 levels load and run (scripts/level_test.sh: unlock, navigate, 20 s random play): 59-61 FPS, no
       crashes or stalls; Waterloo Station's full intro cutscene and sniper section play correctly
 - [ ] Full playthroughs of each mission (objectives, scripted events, endings)
+- [ ] Music: only the start of the first track plays; later tracks never start
+- [ ] Clean shutdown: closing the window can crash (game threads keep running while the app tears down)
 - [ ] Name the game's main subsystems (scheduler, main loop, input, audio, renderer) in `symbols/manual.txt`
 - [ ] Rumble Pak / Controller Pak support
 - [ ] Remove waits on RCP hardware that the runtime doesn't need (as Zelda's `[[patches.instruction]]` do)
@@ -34,6 +36,7 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [x] Keyboard + mouse: WASD move, mouse turns Ethan directly (writes his yaw), right mouse = R (first-person view,
       mouse moves the crosshair), left mouse = Z (shoot), Space = A, Shift = B, Ctrl = crouch. Cursor is captured in
       game; General > Mouse Sensitivity (default 50%).
+- [x] Visual controls map (docs/controls.svg, in the README); camera mode moved to V (E was on both L and R)
 - [x] Mouse/right stick in sniper mode (Waterloo Station, Mainland): added as stick deflection in
       Camera_SniperControl, verified panning in all directions in Waterloo Station
 - [x] Mouse aims the Gunboat turret (normal path; A/B-compared against a no-input run)

@@ -83,6 +83,8 @@ static void set_control_defaults() {
     auto mouse = [](uint8_t button) { return InputField{ InputType::Mouse, button }; };
     set_default_mapping_for_keyboard(GameInput::Z, { mouse(SDL_BUTTON_LEFT), InputField::keyboard(SDL_SCANCODE_Q) });
     set_default_mapping_for_keyboard(GameInput::R, { mouse(SDL_BUTTON_RIGHT), InputField::keyboard(SDL_SCANCODE_E) });
+    // RecompFrontend's default puts L on E too, so aiming with E would also switch the camera mode.
+    set_default_mapping_for_keyboard(GameInput::L, { InputField::keyboard(SDL_SCANCODE_V) });
     set_default_mapping_for_keyboard(GameInput::C_DOWN, { InputField::keyboard(SDL_SCANCODE_LCTRL), InputField::keyboard(SDL_SCANCODE_DOWN) });
 
     // The right stick drives the analog camera, so keep it off the C buttons (sidestep/zoom/crouch).
