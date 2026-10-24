@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 
 #include "decomp/compare.hpp"
@@ -48,9 +49,15 @@ std::vector<Mismatch> mi::decomp::compare(const recomp_context& orig_ctx, const 
     }
 
     // RAM, a word at a time, skipping the dead stack around the entry $sp. Runs of differing words merge.
-    uint32_t sp_offset = entry_sp - 0x80000000u;
-    uint32_t skip_start = sp_offset >= kStackSlack ? sp_offset - kStackSlack : 0;
-    uint32_t skip_end = sp_offset + kArgHomeSize;
+    uint32_t dead_bottom = entry_sp >= 0x80000000u + kUnknownStackSlack ? entry_sp - kUnknownStackSlack : 0x80000000u;
+    for (const ThreadStack& stack : kThreadStacks) {
+        if (entry_sp > stack.bottom && entry_sp <= stack.top) {
+            dead_bottom = std::max(stack.bottom, entry_sp >= stack.bottom + kStackSlack ? entry_sp - kStackSlack : stack.bottom);
+            break;
+        }
+    }
+    uint32_t skip_start = dead_bottom - 0x80000000u;
+    uint32_t skip_end = entry_sp - 0x80000000u + kArgHomeSize;
     Mismatch* run = nullptr;
     for (uint32_t offset = 0; offset < kRamSize; offset += 4) {
         if (offset >= skip_start && offset < skip_end) {

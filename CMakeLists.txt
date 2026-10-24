@@ -97,6 +97,12 @@ if(MI_DECOMP)
     foreach(source ${DECOMP_REPLACED_SOURCES})
         list(REMOVE_ITEM FUNC_C_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/${source})
         list(APPEND FUNC_C_SOURCES ${DECOMP_GEN}/RecompiledFuncs/${source})
+        # A copy older than its original (scripts/recomp.sh ran, e.g. for a hook change) would silently build the old
+        # code: re-run this check whenever an original changes, and stop until scripts/decomp.sh refreshes the copy.
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/RecompiledFuncs/${source})
+        if(${CMAKE_SOURCE_DIR}/RecompiledFuncs/${source} IS_NEWER_THAN ${DECOMP_GEN}/RecompiledFuncs/${source})
+            message(FATAL_ERROR "MI_DECOMP: RecompiledFuncs/${source} changed since scripts/decomp.sh last ran; run it again")
+        endif()
     endforeach()
     # The copies include "funcs.h" from next to the originals.
     target_include_directories(RecompiledFuncs PRIVATE ${CMAKE_SOURCE_DIR}/RecompiledFuncs)
@@ -285,6 +291,9 @@ if(MI_DECOMP)
     add_executable(decomp_compare_test ${CMAKE_SOURCE_DIR}/src/decomp/test_compare.cpp ${CMAKE_SOURCE_DIR}/src/decomp/compare.cpp)
     target_include_directories(decomp_compare_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include)
     add_test(NAME decomp_compare COMMAND decomp_compare_test)
+    add_executable(decomp_dispatch_test ${CMAKE_SOURCE_DIR}/src/decomp/test_dispatch.cpp ${CMAKE_SOURCE_DIR}/src/decomp/dispatch.cpp ${CMAKE_SOURCE_DIR}/src/decomp/compare.cpp)
+    target_include_directories(decomp_dispatch_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include)
+    add_test(NAME decomp_dispatch COMMAND decomp_dispatch_test)
 endif()
 
 # Run the executable from the build dir with assets alongside it.

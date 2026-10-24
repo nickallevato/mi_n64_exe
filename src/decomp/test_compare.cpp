@@ -86,6 +86,25 @@ namespace {
         expect(s.run().empty(), __func__, "dead stack must not count");
     }
 
+    // Game thread stack: [0x800A990C, 0x800B9910). A global just below its bottom must still count.
+    void global_below_stack_bottom_counts() {
+        State s;
+        uint32_t sp = 0x800A9A00;
+        s.set_word(s.orig_ram, 0x800A9654, 1); // the level archive handle, 0x2B8 below the stack bottom
+        s.set_word(s.orig_ram, 0x800A9910, 2); // dead stack, inside the thread's stack
+        auto m = compare(s.orig, s.dec, s.orig_ram.data(), s.dec_ram.data(), sp, false);
+        expect(m.size() == 1 && m[0].addr == 0x800A9654, __func__, "expected only the global below the stack");
+    }
+
+    // An $sp outside every known thread stack: only a small window below it is ignored.
+    void unknown_stack_small_window() {
+        State s;
+        s.set_word(s.orig_ram, State::sp - 0x100, 1);
+        s.set_word(s.orig_ram, State::sp - 0x800, 2);
+        auto m = s.run();
+        expect(m.size() == 1 && m[0].addr == State::sp - 0x800, __func__, "expected only the write 0x800 below sp");
+    }
+
     void write_in_arg_home_ignored() {
         State s;
         s.set_word(s.orig_ram, State::sp + 4, 0x1234);
@@ -128,6 +147,8 @@ int main() {
     caller_saved_ignored();
     write_below_entry_sp_ignored();
     write_in_arg_home_ignored();
+    global_below_stack_bottom_counts();
+    unknown_stack_small_window();
     write_above_arg_home_counts();
     adjacent_words_merge();
     mismatches_capped();

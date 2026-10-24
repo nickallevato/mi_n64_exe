@@ -11,8 +11,25 @@
 namespace mi::decomp {
     // RAM the check compares: all of RDRAM.
     constexpr uint32_t kRamSize = 0x800000;
-    // Dead stack below the entry $sp (the callee's frames) that may differ between versions.
+    // Dead stack below the entry $sp (the callee's frames) may differ between versions. It's ignored down to the
+    // bottom of the thread's stack, at most kStackSlack bytes; for an $sp outside every known stack, kUnknownStackSlack.
     constexpr uint32_t kStackSlack = 0x10000;
+    constexpr uint32_t kUnknownStackSlack = 0x400;
+
+    // The game threads' stacks, from the osCreateThread calls (the libultra manager threads are replaced by the
+    // runtime and run no game code). Three of the splat symbols also hold the thread's 0x1B0-byte OSThread first.
+    struct ThreadStack {
+        uint32_t bottom;
+        uint32_t top;
+    };
+    constexpr ThreadStack kThreadStacks[] = {
+        { 0x800A990C, 0x800B9910 }, // game thread (Game_ThreadMain, id 6): D_800A990C
+        { 0x800A7640, 0x800A7A50 }, // boot thread (func_8000E020, id 1): D_800A7640
+        { 0x800A2100, 0x800A2300 }, // scheduler (func_8006C86C, id 9): D_800A1F50 + OSThread
+        { 0x800A2930, 0x800A2B30 }, // thread 7 (func_8006E730): D_800A2780 + OSThread
+        { 0x800A2D50, 0x800A2F50 }, // thread 8 (func_8006EA04): D_800A2BA0 + OSThread
+        { 0x800A3184, 0x800A5190 }, // audio (func_800725A4, id 3): D_800A3184
+    };
     // o32: the 16-byte argument save area just above the entry $sp belongs to the callee.
     constexpr uint32_t kArgHomeSize = 0x10;
     constexpr size_t kMaxMismatches = 16;

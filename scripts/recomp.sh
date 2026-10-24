@@ -18,3 +18,8 @@ echo "OK: $(grep -c '{ name =' syms.toml) functions recompiled into RecompiledFu
 mkdir -p rsp
 ./build/n64recomp/RSPRecomp n_aspMain.us.toml
 echo "OK: rsp/n_aspMain.cpp"
+
+# Developer builds with decompiled functions copy some RecompiledFuncs files; refresh them (docs/DECOMP.md).
+if [[ -d build/decomp/gen ]]; then
+    scripts/decomp.sh
+fi

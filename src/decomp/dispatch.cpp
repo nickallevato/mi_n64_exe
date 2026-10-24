@@ -34,9 +34,10 @@ namespace {
     };
     std::unique_ptr<Stats[]> stats;
 
-    // One check at a time: the RDRAM copies are shared. A call that finds them busy (another thread, or a nested
-    // dispatched call inside a check) just runs its selected version.
+    // One check at a time: the RDRAM copies are shared. A call that finds them busy (another thread) or that is made
+    // from inside a check on this thread just runs its selected version.
     std::mutex check_mutex;
+    thread_local bool in_check = false;
     // Private RAM copies for the two runs: game RAM plus the patch area above it (decompiled code's data), up to
     // 0x81000000.
     constexpr size_t kCopySize = 0x1000000;
@@ -222,10 +223,12 @@ void mi::decomp::init() {
 void mi::decomp::call(int id, uint8_t* rdram, recomp_context* ctx) {
     const Entry& entry = mi_decomp_entries[id];
     uint64_t call_number = ++stats[id].calls;
-    if (check_enabled && use_decomp[id] && entry.method == Method::Check && call_number % check_every == 0) {
+    if (check_enabled && !in_check && use_decomp[id] && entry.method == Method::Check && call_number % check_every == 0) {
         std::unique_lock lock(check_mutex, std::try_to_lock);
         if (lock.owns_lock()) {
+            in_check = true;
             check_call(id, rdram, ctx, call_number);
+            in_check = false;
             lock.unlock();
             entry.orig(rdram, ctx);
             return;

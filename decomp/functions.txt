@@ -4,7 +4,8 @@
 # method: check = run side by side with the original in check mode (MI_DECOMP_CHECK=1);
 #         read  = never run twice (e.g. it waits on a message or thread); checked by reading it against the asm.
 #         Put the reason on a comment line above a read line.
-# flags:  hooks-moved = mi.us.toml hooks this function, and the hook now lives in the decompiled C.
+# flags:  hooks-moved=VRAM.HASH = this mi.us.toml hook now lives in the decompiled C; one per hook, comma-separated.
+#         The hash is of the hook's text, so a hook added or changed later fails the build; the error prints the flag.
 #         ret64 = returns a 64-bit value (s64, u64, double); the check then also compares r3 and f1/f3.
 
 # loading: Burp archives (decomp/src/loading/burp.c)
@@ -23,9 +24,9 @@ Burp_GetCount       loading  on  check
 # Rom_Read (see above).
 Burp_ReadRaw        loading  on  read
 # Rom_Read (see above).
-Burp_LoadTo         loading  on  read  hooks-moved
+Burp_LoadTo         loading  on  read  hooks-moved=80068CD4.72c73239
 # Rom_Read (see above).
-Burp_Load           loading  on  read  hooks-moved
+Burp_Load           loading  on  read  hooks-moved=80068E64.72c73239
 # Rom_Read (see above).
 Burp_ReadRawByName  loading  on  read
 # Rom_Read (see above).

@@ -54,8 +54,10 @@ The game log says how many functions run decompiled: `[decomp] 13 functions: 13 
    behavior and write a comment saying so.
 5. **List it** in `decomp/functions.txt`: `name system on check|read [flags]`.
 6. **Move any hooks.** If `mi.us.toml` has a `[[patches.hook]]` in the function, call the same native code from the C
-   (see "Native imports") and add the `hooks-moved` flag. The build refuses a hooked function without it. Leave the
-   hook in `mi.us.toml`: release builds and the `F__orig` version still use it.
+   (see "Native imports") and add a `hooks-moved=VRAM.HASH` flag for each hook; `scripts/decomp.sh` fails and prints
+   the exact flag. The hash is of the hook's text, so adding or changing a hook in a decompiled function later fails
+   the build until the C is updated too. Leave the hook in `mi.us.toml`: release builds and the `F__orig` version
+   still use it.
 7. **Build and check:** `scripts/decomp.sh`, rebuild, a quick `MI_LEVEL` run with `MI_DECOMP_CHECK=1`, then the full
    check run and the progress report.
 
