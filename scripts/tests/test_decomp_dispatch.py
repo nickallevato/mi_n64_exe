@@ -38,6 +38,12 @@ RECOMP_FUNC void Burp_Load(uint8_t* rdram, recomp_context* ctx) {
 ;}
 """
 
+HELPER_C = """
+RECOMP_FUNC void Burp_Decode_00000000(uint8_t* rdram, recomp_context* ctx) {
+    ctx->r2 = 1;
+;}
+"""
+
 SYMS = """\
 [[section]]
 name = ".text"
@@ -142,6 +148,15 @@ class DecompDispatchTest(unittest.TestCase):
             proc = f.run()
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("Burp_Load", proc.stderr)
+
+    def test_helper_function_allowed(self):
+        # A static helper in the decompiled C isn't a game function; it needs no line and is left as is.
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Fixture(tmp, "Burp_Load loading on check\n")
+            (f.root / "decomp/decomp.c").write_text(DECOMP_C + HELPER_C)
+            proc = f.run()
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertIn("RECOMP_FUNC void Burp_Decode_00000000(", (f.out / "decomp.c").read_text())
 
     def test_bad_line_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

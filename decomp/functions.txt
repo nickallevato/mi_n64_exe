@@ -8,3 +8,7 @@
 
 # loading: Burp archives
 Burp_GetCount     loading  on  check
+# Rom_Read waits on osRecvMesg for each DMA chunk, which can switch to another game thread mid-check.
+Burp_LoadTo       loading  on  read  hooks-moved
+# Rom_Read waits on osRecvMesg (see Burp_LoadTo).
+Burp_Load         loading  on  read  hooks-moved

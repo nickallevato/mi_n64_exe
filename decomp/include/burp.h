@@ -14,8 +14,12 @@ typedef struct BurpEntry {
     /* 0x04 */ u32 storedSize; /* size in ROM */
     /* 0x08 */ u32 name;       /* in ROM: offset of the name; after Burp_Open: pointer into BurpArchive.names */
     /* 0x0C */ u32 romAddr;    /* in ROM: offset of the data; after Burp_Open: absolute ROM address */
-    /* 0x10 */ u32 packing;    /* 4 = raw DEFLATE */
+    /* 0x10 */ u8 packing;     /* BURP_STORED or BURP_DEFLATE */
+    /* 0x11 */ u8 pad11[3];
 } BurpEntry; /* size = 0x14 */
+
+#define BURP_STORED 0
+#define BURP_DEFLATE 4
 
 /* An open archive, allocated by Burp_Open. */
 typedef struct BurpArchive {
@@ -28,5 +32,8 @@ typedef struct BurpArchive {
 } BurpArchive; /* size = 0x18 */
 
 u32 Burp_GetCount(BurpArchive* archive);
+BurpEntry* Burp_GetEntry(BurpArchive* archive, u32 index);
+u8 Burp_LoadTo(BurpArchive* archive, u32 index, void* dest);
+void* Burp_Load(BurpArchive* archive, u32 index);
 
 #endif

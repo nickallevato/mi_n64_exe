@@ -274,6 +274,7 @@ if(MI_DECOMP)
         ${CMAKE_SOURCE_DIR}/src/main/register_decomp.cpp
         ${CMAKE_SOURCE_DIR}/src/decomp/dispatch.cpp
         ${CMAKE_SOURCE_DIR}/src/decomp/compare.cpp
+        ${CMAKE_SOURCE_DIR}/src/decomp/imports.cpp
         ${DECOMP_GEN}/dispatch.cpp
     )
     target_include_directories(MIRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src)

@@ -101,7 +101,9 @@ def main():
             if hook.get("func") == e["name"] and "hooks-moved" not in e["flags"]:
                 errors.append(f"{e['name']}: mi.us.toml hooks it at 0x{hook['before_vram']:08X}; move the hook into "
                               f"the decompiled C and mark the line hooks-moved")
-    for name in sorted(decompiled - names):
+    # A decompiled game function must be listed, or it would replace the original with no switch. Other functions in
+    # decomp.c are helpers of our own and need no line.
+    for name in sorted((decompiled & known) - names):
         errors.append(f"{name}: decompiled but not listed in {args.list}")
 
     copies = {}
