@@ -84,7 +84,42 @@ target_include_directories(RecompiledFuncs PRIVATE
 file(GLOB FUNC_C_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/*.c)
 file(GLOB FUNC_CXX_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/*.cpp)
 
+# Developer build with decompiled functions (docs/DECOMP.md). Run scripts/decomp.sh first. Release builds leave this off.
+option(MI_DECOMP "Developer build with decompiled functions" OFF)
+if(MI_DECOMP)
+    set(DECOMP_GEN ${CMAKE_SOURCE_DIR}/build/decomp/gen)
+    if(NOT EXISTS ${DECOMP_GEN}/sources.txt)
+        message(FATAL_ERROR "MI_DECOMP: run scripts/decomp.sh first")
+    endif()
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${DECOMP_GEN}/sources.txt)
+    # Recompiled files that define a decompiled function are replaced by copies with that definition renamed F__orig.
+    file(STRINGS ${DECOMP_GEN}/sources.txt DECOMP_REPLACED_SOURCES)
+    foreach(source ${DECOMP_REPLACED_SOURCES})
+        list(REMOVE_ITEM FUNC_C_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/${source})
+        list(APPEND FUNC_C_SOURCES ${DECOMP_GEN}/RecompiledFuncs/${source})
+    endforeach()
+    # The copies include "funcs.h" from next to the originals.
+    target_include_directories(RecompiledFuncs PRIVATE ${CMAKE_SOURCE_DIR}/RecompiledFuncs)
+endif()
+
 target_sources(RecompiledFuncs PRIVATE ${FUNC_C_SOURCES} ${FUNC_CXX_SOURCES})
+
+if(MI_DECOMP)
+    # DecompFuncs - the decompiled functions (F__decomp) recompiled from decomp/ by scripts/decomp.sh
+    add_library(DecompFuncs STATIC ${DECOMP_GEN}/decomp.c ${DECOMP_GEN}/decomp_bin.c)
+    target_compile_options(DecompFuncs PRIVATE
+        -fno-strict-aliasing
+        -Wno-unused-variable
+        -Wno-implicit-function-declaration
+        -falign-functions=16
+    )
+    target_include_directories(DecompFuncs PRIVATE
+        ${CMAKE_SOURCE_DIR}/RecompiledDecomp
+        ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
+        ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
+        ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
+    )
+endif()
 
 # Main executable
 add_executable(MIRecompiled)
@@ -233,6 +268,17 @@ target_link_libraries(MIRecompiled PRIVATE
 )
 
 target_sources(MIRecompiled PRIVATE ${SOURCES})
+
+if(MI_DECOMP)
+    target_sources(MIRecompiled PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/main/register_decomp.cpp
+        ${CMAKE_SOURCE_DIR}/src/decomp/dispatch.cpp
+        ${DECOMP_GEN}/dispatch.cpp
+    )
+    target_include_directories(MIRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    target_compile_definitions(MIRecompiled PRIVATE MI_DECOMP MI_DECOMP_LIST_DEFAULT="${CMAKE_SOURCE_DIR}/decomp/functions.txt")
+    target_link_libraries(MIRecompiled PRIVATE DecompFuncs)
+endif()
 
 # Run the executable from the build dir with assets alongside it.
 add_custom_command(TARGET MIRecompiled POST_BUILD

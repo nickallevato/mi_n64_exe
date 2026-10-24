@@ -566,6 +566,9 @@ int main(int argc, char** argv) {
     recompui::register_ui_exports();
 
     mi::register_overlays();
+#ifdef MI_DECOMP
+    mi::register_decomp();
+#endif
 
     recompinput::players::set_single_player_mode(true);
 

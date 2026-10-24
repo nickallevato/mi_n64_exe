@@ -10,6 +10,8 @@ namespace mi {
     inline const std::u8string program_id = u8"MIRecompiled";
 
     void register_overlays();
+    // Developer builds with -DMI_DECOMP=ON (src/main/register_decomp.cpp).
+    void register_decomp();
     void stats_on_vi();
     void stats_on_audio(size_t sample_count);
     void stats_set_rdram(uint8_t* rdram);

@@ -1,0 +1,10 @@
+# Decompiled functions (scripts/decomp_dispatch.py, src/decomp/dispatch.cpp). One per line:
+#   name  system  on|off  check|read  [flags]
+# state:  on = the decompiled version runs (developer builds), off = the recompiled original runs.
+# method: check = run side by side with the original in check mode (MI_DECOMP_CHECK=1);
+#         read  = never run twice (e.g. it waits on a message or thread); checked by reading it against the asm.
+#         Put the reason on a comment line above a read line.
+# flags:  hooks-moved = mi.us.toml hooks this function, and the hook now lives in the decompiled C.
+
+# loading: Burp archives
+Burp_GetCount     loading  on  check
