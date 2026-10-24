@@ -31,9 +31,18 @@ typedef struct BurpArchive {
     /* 0x14 */ u32 namesOffset;  /* offset of the name strings in the archive */
 } BurpArchive; /* size = 0x18 */
 
-u32 Burp_GetCount(BurpArchive* archive);
+BurpArchive* Burp_Open(u32 romStart, u32 romEnd);
+void Burp_Close(BurpArchive* archive);
 BurpEntry* Burp_GetEntry(BurpArchive* archive, u32 index);
+char* Burp_GetName(BurpArchive* archive, u32 index);
+s32 Burp_FindByName(BurpArchive* archive, char* name);
+s32 Burp_CopyEntry(BurpArchive* archive, u32 index, BurpEntry* out);
+u32 Burp_GetCount(BurpArchive* archive);
+s32 Burp_ReadRaw(BurpArchive* archive, u32 index, void* dest);
 u8 Burp_LoadTo(BurpArchive* archive, u32 index, void* dest);
 void* Burp_Load(BurpArchive* archive, u32 index);
+s32 Burp_ReadRawByName(BurpArchive* archive, char* name, void* dest);
+u8 Burp_LoadToByName(BurpArchive* archive, char* name, void* dest);
+void* Burp_LoadByName(BurpArchive* archive, char* name);
 
 #endif

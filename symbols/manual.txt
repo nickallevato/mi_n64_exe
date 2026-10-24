@@ -82,6 +82,9 @@ Rom_Read = 0x80068638;
 
 // ==== Levels and assets (docs/levels-loading.md) ====
 // ---- "Burp" archives (every asset in ROM 0x94440-0xBEC6B0 is in one) ----
+// Str_Compare(a, b): strcmp (compares a word at a time when a and b are equally aligned). Not named strcmp:
+// N64Recomp renames libc names.
+Str_Compare = 0x80083610;
 // Burp_Open(romStart, romEnd): reads the 'Burp' header, the count x 0x14-byte entry table and (if entry 0 has a name)
 // the name table; makes entry data offsets absolute ROM addresses. Returns a 0x18-byte handle (+0 count, +4 entries,
 // +8 names, +0xC romStart, +0x10 size, +0x14 name-table offset) or 0 if the magic is wrong.

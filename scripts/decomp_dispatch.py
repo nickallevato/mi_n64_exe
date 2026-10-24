@@ -11,8 +11,9 @@ Only definition lines are renamed; calls keep the plain name, so every call goes
     decomp_dispatch.py --list decomp/functions.txt --funcs RecompiledFuncs --decomp RecompiledDecomp
                        --syms syms.toml --hooks mi.us.toml --out build/decomp/gen
 
-functions.txt: `name system on|off check|read [flags]`, one per line; `#` starts a comment. The only flag is
-`hooks-moved`, required when mi.us.toml hooks the function (the hook must now live in the decompiled C).
+functions.txt: `name system on|off check|read [flags]`, one per line; `#` starts a comment. Flags (comma-separated):
+`hooks-moved`, required when mi.us.toml hooks the function (the hook must now live in the decompiled C), and `ret64`,
+for a function returning a 64-bit value (s64, u64, double), whose high return words the check then compares too.
 """
 import argparse
 import re
@@ -24,7 +25,7 @@ from pathlib import Path
 DEF_RE = re.compile(r"^RECOMP_FUNC void (\w+)\(uint8_t\* rdram, recomp_context\* ctx\) \{$", re.M)
 STATES = ("on", "off")
 METHODS = {"check": "Check", "read": "Read"}
-FLAGS = ("hooks-moved",)
+FLAGS = ("hooks-moved", "ret64")
 
 
 def parse_list(path, errors):
@@ -66,7 +67,7 @@ def dispatch_cpp(entries):
     out += ['}', '', 'const mi::decomp::Entry mi_decomp_entries[] = {']
     for e in entries:
         out.append(f'    {{ "{e["name"]}", {e["name"]}__orig, {e["name"]}__decomp, '
-                   f'mi::decomp::Method::{METHODS[e["method"]]} }},')
+                   f'mi::decomp::Method::{METHODS[e["method"]]}, {"true" if "ret64" in e["flags"] else "false"} }},')
     out += ['};', f'const int mi_decomp_entry_count = {len(entries)};', '']
     for i, e in enumerate(entries):
         out.append(f'extern "C" void {e["name"]}(uint8_t* rdram, recomp_context* ctx) '

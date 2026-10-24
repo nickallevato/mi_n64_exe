@@ -15,6 +15,7 @@ namespace mi::decomp {
         recomp_func_t* orig;
         recomp_func_t* decomp;
         Method method;
+        bool ret64; // returns a 64-bit value: the check also compares r3 and the odd float return registers
     };
 
     // Read the on/off list (MI_DECOMP_LIST or decomp/functions.txt) and MI_DECOMP_OFF. Call once at startup.

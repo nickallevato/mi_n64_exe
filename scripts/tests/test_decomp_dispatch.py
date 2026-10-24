@@ -149,6 +149,18 @@ class DecompDispatchTest(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("Burp_Load", proc.stderr)
 
+    def test_ret64_flag_in_table(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Fixture(tmp, "Burp_Load loading on check ret64\n")
+            proc = f.run()
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertIn("mi::decomp::Method::Check, true }", (f.out / "dispatch.cpp").read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Fixture(tmp, "Burp_Load loading on check\n")
+            proc = f.run()
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertIn("mi::decomp::Method::Check, false }", (f.out / "dispatch.cpp").read_text())
+
     def test_helper_function_allowed(self):
         # A static helper in the decompiled C isn't a game function; it needs no line and is left as is.
         with tempfile.TemporaryDirectory() as tmp:

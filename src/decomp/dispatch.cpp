@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -36,7 +37,10 @@ namespace {
     // One check at a time: the RDRAM copies are shared. A call that finds them busy (another thread, or a nested
     // dispatched call inside a check) just runs its selected version.
     std::mutex check_mutex;
-    std::vector<uint8_t> ram_before, ram_after_orig;
+    // Private RAM copies for the two runs: game RAM plus the patch area above it (decompiled code's data), up to
+    // 0x81000000.
+    constexpr size_t kCopySize = 0x1000000;
+    std::vector<uint8_t> ram_orig, ram_decomp;
 
     int find_entry(const std::string& name) {
         for (int i = 0; i < mi_decomp_entry_count; i++) {
@@ -101,30 +105,38 @@ namespace {
         }
     }
 
-    // Run the original and the decompiled version from the same state and compare. The game always continues with
-    // the original's result, so a wrong decompiled function can't change the play session.
+    // A copy of ctx for running on a private RAM copy. f_odd points into the context itself, so move it onto the copy.
+    recomp_context copy_context(const recomp_context& ctx) {
+        recomp_context copy = ctx;
+        ptrdiff_t f_odd_offset = reinterpret_cast<const uint8_t*>(ctx.f_odd) - reinterpret_cast<const uint8_t*>(&ctx);
+        if (f_odd_offset >= 0 && f_odd_offset < (ptrdiff_t)sizeof(recomp_context)) {
+            copy.f_odd = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(&copy) + f_odd_offset);
+        }
+        return copy;
+    }
+
+    // Run the original and the decompiled version on two private copies of RAM from the same state and compare them.
+    // Other native threads (audio and graphics tasks) keep writing live RAM meanwhile, but can't touch the copies.
+    // Then the original runs for real on live RAM, so the game always continues with the original's result.
     void check_call(int id, uint8_t* rdram, recomp_context* ctx, uint64_t call_number) {
         const mi::decomp::Entry& entry = mi_decomp_entries[id];
         Stats& s = stats[id];
 
-        recomp_context ctx_before = *ctx;
-        std::memcpy(ram_before.data(), rdram, mi::decomp::kRamSize);
+        std::memcpy(ram_orig.data(), rdram, kCopySize);
+        // Other threads keep writing live RAM, which the compiler doesn't know: without this barrier it may turn the
+        // second copy into another copy from live RAM, and the two copies differ.
+        asm volatile("" ::: "memory");
+        std::memcpy(ram_decomp.data(), ram_orig.data(), kCopySize);
+        recomp_context ctx_orig = copy_context(*ctx);
+        recomp_context ctx_decomp = copy_context(*ctx);
 
-        entry.orig(rdram, ctx);
-        recomp_context ctx_orig = *ctx;
-        std::memcpy(ram_after_orig.data(), rdram, mi::decomp::kRamSize);
-
-        *ctx = ctx_before;
-        std::memcpy(rdram, ram_before.data(), mi::decomp::kRamSize);
-        entry.decomp(rdram, ctx);
+        entry.orig(ram_orig.data(), &ctx_orig);
+        entry.decomp(ram_decomp.data(), &ctx_decomp);
         if (check_selftest) {
-            ctx->r2 ^= 1;
+            ctx_decomp.r2 ^= 1;
         }
-
-        auto mismatches = mi::decomp::compare(ctx_orig, *ctx, ram_after_orig.data(), rdram, (uint32_t)ctx_before.r29);
-
-        *ctx = ctx_orig;
-        std::memcpy(rdram, ram_after_orig.data(), mi::decomp::kRamSize);
+        auto mismatches = mi::decomp::compare(ctx_orig, ctx_decomp, ram_orig.data(), ram_decomp.data(),
+            (uint32_t)ctx->r29, entry.ret64);
 
         s.checked++;
         if (!mismatches.empty()) {
@@ -139,7 +151,6 @@ namespace {
                 }
             }
         }
-
     }
 }
 
@@ -202,8 +213,8 @@ void mi::decomp::init() {
         });
     }
     if (check_enabled) {
-        ram_before.resize(mi::decomp::kRamSize);
-        ram_after_orig.resize(mi::decomp::kRamSize);
+        ram_orig.resize(kCopySize);
+        ram_decomp.resize(kCopySize);
         std::fprintf(stderr, "[decomp] check mode: every %u call(s)%s\n", check_every, check_selftest ? ", self-test" : "");
     }
 }
@@ -215,6 +226,8 @@ void mi::decomp::call(int id, uint8_t* rdram, recomp_context* ctx) {
         std::unique_lock lock(check_mutex, std::try_to_lock);
         if (lock.owns_lock()) {
             check_call(id, rdram, ctx, call_number);
+            lock.unlock();
+            entry.orig(rdram, ctx);
             return;
         }
     }

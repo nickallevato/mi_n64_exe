@@ -26,11 +26,11 @@ namespace mi::decomp {
     };
 
     // Compare the state after the original and after the decompiled version of a function, both run from the same
-    // starting state. Compared: return values (r2, r3, f0-f3), callee-saved registers (r16-r23, r29, r30, f20-f31)
-    // and RAM except the dead stack around entry_sp. RAM buffers are RDRAM as the recomp stores it (native-endian
-    // words), kRamSize bytes from 0x80000000.
+    // starting state. Compared: return values (r2, f0, f2; with ret64 also r3, f1, f3, which only carry a 64-bit
+    // result), callee-saved registers (r16-r23, r29, r30, f20-f31) and RAM except the dead stack around entry_sp.
+    // RAM buffers are RDRAM as the recomp stores it (native-endian words), kRamSize bytes from 0x80000000.
     std::vector<Mismatch> compare(const recomp_context& orig_ctx, const recomp_context& dec_ctx,
-        const uint8_t* orig_ram, const uint8_t* dec_ram, uint32_t entry_sp);
+        const uint8_t* orig_ram, const uint8_t* dec_ram, uint32_t entry_sp, bool ret64);
 }
 
 #endif

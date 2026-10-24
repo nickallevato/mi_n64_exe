@@ -13,16 +13,23 @@ namespace {
 }
 
 std::vector<Mismatch> mi::decomp::compare(const recomp_context& orig_ctx, const recomp_context& dec_ctx,
-    const uint8_t* orig_ram, const uint8_t* dec_ram, uint32_t entry_sp) {
+    const uint8_t* orig_ram, const uint8_t* dec_ram, uint32_t entry_sp, bool ret64) {
     std::vector<Mismatch> out;
 
-    // Return values. In o32 a double spans an even/odd pair, stored as the even register's low/high words.
+    // Return values. In o32 a double spans an even/odd pair, stored as the even register's low/high words. r3 and the
+    // odd float registers only carry a result for 64-bit returns; otherwise they're scratch and may differ.
     compare_reg(out, "r2", orig_ctx.r2, dec_ctx.r2);
-    compare_reg(out, "r3", orig_ctx.r3, dec_ctx.r3);
+    if (ret64) {
+        compare_reg(out, "r3", orig_ctx.r3, dec_ctx.r3);
+    }
     compare_reg(out, "f0", orig_ctx.f0.u32l, dec_ctx.f0.u32l);
-    compare_reg(out, "f1", orig_ctx.f0.u32h, dec_ctx.f0.u32h);
+    if (ret64) {
+        compare_reg(out, "f1", orig_ctx.f0.u32h, dec_ctx.f0.u32h);
+    }
     compare_reg(out, "f2", orig_ctx.f2.u32l, dec_ctx.f2.u32l);
-    compare_reg(out, "f3", orig_ctx.f2.u32h, dec_ctx.f2.u32h);
+    if (ret64) {
+        compare_reg(out, "f3", orig_ctx.f2.u32h, dec_ctx.f2.u32h);
+    }
 
     // Callee-saved registers.
     const gpr* orig_saved[] = { &orig_ctx.r16, &orig_ctx.r17, &orig_ctx.r18, &orig_ctx.r19, &orig_ctx.r20, &orig_ctx.r21,

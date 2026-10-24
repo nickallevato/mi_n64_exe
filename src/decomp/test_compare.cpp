@@ -28,8 +28,8 @@ namespace {
         void set_word(std::vector<uint8_t>& ram, uint32_t addr, uint32_t value) {
             std::memcpy(&ram[addr - 0x80000000], &value, 4);
         }
-        std::vector<mi::decomp::Mismatch> run() {
-            return compare(orig, dec, orig_ram.data(), dec_ram.data(), sp);
+        std::vector<mi::decomp::Mismatch> run(bool ret64 = false) {
+            return compare(orig, dec, orig_ram.data(), dec_ram.data(), sp, ret64);
         }
     };
 
@@ -45,6 +45,23 @@ namespace {
         s.dec.r2 = 2;
         auto m = s.run();
         expect(m.size() == 1 && m[0].what == "r2" && m[0].orig == 1 && m[0].decomp == 2, __func__, "expected one r2 mismatch");
+    }
+
+    // $v1 and the odd float return registers only carry a result for 64-bit returns (s64, u64, double).
+    void high_return_words_ignored_by_default() {
+        State s;
+        s.orig.r3 = 1;
+        s.orig.f0.u32h = 1;
+        s.orig.f2.u32h = 1;
+        expect(s.run().empty(), __func__, "r3/f1/f3 must not count for a 32-bit return");
+    }
+
+    void high_return_words_compared_for_ret64() {
+        State s;
+        s.orig.r3 = 1;
+        s.orig.f0.u32h = 1;
+        auto m = s.run(true);
+        expect(m.size() == 2 && m[0].what == "r3" && m[1].what == "f1", __func__, "expected r3 and f1 mismatches");
     }
 
     void callee_saved_differs() {
@@ -105,6 +122,8 @@ namespace {
 int main() {
     identical_states_match();
     v0_differs();
+    high_return_words_ignored_by_default();
+    high_return_words_compared_for_ret64();
     callee_saved_differs();
     caller_saved_ignored();
     write_below_entry_sp_ignored();
