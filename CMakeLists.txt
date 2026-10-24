@@ -273,11 +273,17 @@ if(MI_DECOMP)
     target_sources(MIRecompiled PRIVATE
         ${CMAKE_SOURCE_DIR}/src/main/register_decomp.cpp
         ${CMAKE_SOURCE_DIR}/src/decomp/dispatch.cpp
+        ${CMAKE_SOURCE_DIR}/src/decomp/compare.cpp
         ${DECOMP_GEN}/dispatch.cpp
     )
     target_include_directories(MIRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/src)
     target_compile_definitions(MIRecompiled PRIVATE MI_DECOMP MI_DECOMP_LIST_DEFAULT="${CMAKE_SOURCE_DIR}/decomp/functions.txt")
     target_link_libraries(MIRecompiled PRIVATE DecompFuncs)
+
+    enable_testing()
+    add_executable(decomp_compare_test ${CMAKE_SOURCE_DIR}/src/decomp/test_compare.cpp ${CMAKE_SOURCE_DIR}/src/decomp/compare.cpp)
+    target_include_directories(decomp_compare_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include)
+    add_test(NAME decomp_compare COMMAND decomp_compare_test)
 endif()
 
 # Run the executable from the build dir with assets alongside it.
