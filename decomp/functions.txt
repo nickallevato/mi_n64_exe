@@ -13,9 +13,12 @@
 Burp_Open           loading  on  read
 Burp_Close          loading  on  check
 Burp_GetEntry       loading  on  check
-Burp_GetName        loading  on  check
+# Only ever called from Burp_FindByName, so it's never checked on its own; Burp_FindByName's check covers it (1122
+# checked calls in the 20-level run), and it was checked by reading.
+Burp_GetName        loading  on  read
 Burp_FindByName     loading  on  check
-Burp_CopyEntry      loading  on  check
+# Never called in the 20-level run; checked by reading.
+Burp_CopyEntry      loading  on  read
 Burp_GetCount       loading  on  check
 # Rom_Read (see above).
 Burp_ReadRaw        loading  on  read

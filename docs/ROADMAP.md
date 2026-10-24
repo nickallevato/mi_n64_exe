@@ -68,7 +68,23 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
 - [ ] Collision, prop (.DOF) models and the SOOL level script format
 - [x] Developer tools: General > Developer Tools shows a Debug tab (Start in Level, Unlock All Levels, Load Data
       Overrides); MI_LEVEL and MI_OVERRIDE_DIR do the same from the command line
-- [ ] Patches pipeline: `patches/` C compiled for MIPS, recompiled with `patches.toml` (like Banjo's PatchesLib)
+- [x] Patches pipeline: decompiled C in `decomp/` compiled for MIPS (clang) and recompiled by N64Recomp in patch mode
+      (`decomp.toml`, like Banjo's PatchesLib); developer builds only (`-DMI_DECOMP=ON`). See docs/DECOMP.md.
 - [ ] Export the symbol file for mod authors (`RecompModTool`, a `.nrm` template)
 - [ ] Texture packs (`.rtz`, RT64 replacement)
 - [ ] Mod config menu integration
+
+## Decomp (readable source)
+
+Equivalent decomp: hand-written C that behaves like each original function, swapped in and checked side by side in
+developer builds ([DECOMP.md](DECOMP.md), [design](superpowers/specs/2026-10-24-equivalent-decomp-design.md)).
+Systems in the order the level and expansion work needs them:
+
+- [ ] Mission logic: SOOL script VM (0x80057xxx-0x80060xxx), objectives, triggers, alarms
+- [ ] Objects and enemies: object pool, guard AI, doors and props (`.DOF`)
+- [ ] Level loading: load sequence, level table, mission flow
+  - [x] Burp archives: all 13 `Burp_*` functions. 20-level check run: 4 checked in game (9,746 checked calls, 0
+        differences), 9 checked by reading (7 wait on DMA; Burp_GetName only runs inside Burp_FindByName's check;
+        Burp_CopyEntry is never called); all levels 60 FPS, no crashes
+- [ ] Geometry, collision and visibility
+- [ ] Player, camera, input, HUD (as needed)

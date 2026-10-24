@@ -207,6 +207,8 @@ N64ModernRuntime can provide its own implementations.
 - `scripts/release/build_linux.sh` builds the release (AppImage and .tar.gz) in an Ubuntu 22.04 container (Docker).
 - `MI_STATS=1` prints graphics tasks and VIs per second; `MI_WATCH=addr[:n],...` prints game RAM each second.
 - `MI_FRAMETIMES=file` logs a timestamp for every VI and every game frame submitted, for checking frame pacing.
+- The decomp (readable C for game functions, swapped in and checked in developer builds) has its own guide:
+  [docs/DECOMP.md](docs/DECOMP.md).
 
 </details>
 
