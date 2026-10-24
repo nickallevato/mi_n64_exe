@@ -1,0 +1,16 @@
+# N64Recomp config for the decompiled game code (decomp/), built by scripts/decomp.sh. Like BanjoRecomp's patches.toml.
+
+[input]
+elf_path = "build/decomp/decomp.elf"
+output_func_path = "RecompiledDecomp"
+single_file_output = true
+# Calls and data references to the original game resolve by name from these.
+use_absolute_symbols = true
+func_reference_syms_file = "syms.toml"
+data_reference_syms_files = [ "build/decomp/datasyms.toml" ]
+# Writing the binary here lets N64Recomp patch the MIPS32 relocs.
+output_binary_path = "build/decomp/decomp.bin"
+# clang emits many unpaired LO16 relocs.
+unpaired_lo16_warnings = false
+# Every function marked DECOMP must replace a game function, and no other function may share a game function's name.
+strict_patch_mode = true

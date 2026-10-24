@@ -5,6 +5,7 @@ rom/
 tools/
 build/
 RecompiledFuncs/
+RecompiledDecomp/
 # ROM-derived / generated
 split/asm/
 split/assets/
