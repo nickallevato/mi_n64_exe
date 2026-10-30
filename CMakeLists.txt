@@ -288,6 +288,11 @@ target_link_libraries(MIRecompiled PRIVATE
 
 target_sources(MIRecompiled PRIVATE ${SOURCES})
 
+if (WIN32)
+    # App icon for the exe, its shortcuts and the game window (scripts/release/icon.ico, made from icon.png).
+    target_sources(MIRecompiled PRIVATE ${CMAKE_SOURCE_DIR}/scripts/release/MIRecompiled.rc)
+endif()
+
 if(MI_DECOMP)
     target_sources(MIRecompiled PRIVATE
         ${CMAKE_SOURCE_DIR}/src/main/register_decomp.cpp
