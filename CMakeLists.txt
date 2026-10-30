@@ -253,10 +253,10 @@ set (DXC_CS_OPTS "${DXC_COMMON_OPTS}" "-E" "CSMain" "-T cs_6_0")
 set (DXC_GS_OPTS "${DXC_COMMON_OPTS}" "-E" "GSMain" "-T gs_6_0")
 set (DXC_RT_OPTS "${DXC_COMMON_OPTS}" "-D" "RT_SHADER" "-T" "lib_6_3" "-fspv-target-env=vulkan1.1spirv1.4" "-fspv-extension=SPV_KHR_ray_tracing" "-fspv-extension=SPV_EXT_descriptor_indexing")
 
-if (${WIN32} AND CMAKE_HOST_WIN32)
+if (WIN32 AND CMAKE_HOST_WIN32)
     set (DXC "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc.exe")
     add_compile_definitions(NOMINMAX)
-elseif (${WIN32})
+elseif (WIN32)
     # Cross-compiling for Windows from Linux: Linux DXC for SPIR-V, the Windows dxc.exe under Wine for DXIL so it matches
     # the shipped dxcompiler.dll (see patches/deps/rt64-cross-compile-windows.patch).
     set (DXC "LD_LIBRARY_PATH=${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/lib/x64" "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc-linux")
