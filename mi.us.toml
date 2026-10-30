@@ -65,6 +65,13 @@ func = "Rom_Read"
 before_vram = 0x80068638
 text = "{ void mi_stats_rom_read(uint32_t, uint32_t, uint32_t, uint32_t); mi_stats_rom_read((uint32_t)ctx->r4, (uint32_t)ctx->r5, (uint32_t)ctx->r6, (uint32_t)ctx->r31); }"
 
+# Widescreen (src/game/widescreen.cpp): black bars beside the IMF handheld's bezel in in-engine cutscenes, which
+# otherwise show the 3D scene past the 4:3 bezel. Called at the start of every Image_Draw ($a0 = Gfx**, $a1 = image).
+[[patches.hook]]
+func = "Image_Draw"
+before_vram = 0x80063A10
+text = "{ void mi_widescreen_image_draw(uint8_t*, uint32_t, uint32_t); mi_widescreen_image_draw(rdram, (uint32_t)ctx->r4, (uint32_t)ctx->r5); }"
+
 # Smooth root motion at 60 fps (src/game/enhancements.cpp): walking moves characters one animation keyframe step at
 # a time, and at 60 fps many frames don't reach a new keyframe. At the common exit ($t1 = animation state, $t3 = out
 # vector, X/Z already stored), add the partial step for the fraction of a keyframe played.

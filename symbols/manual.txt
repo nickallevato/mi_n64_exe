@@ -159,6 +159,9 @@ Chars_OpenArchive = 0x80053310;
 Anims_OpenArchive = 0x80054680;
 // Opens the 2D image archive 0x785160 (menus, HUD) into D_8008C520.
 Images_OpenArchive = 0x800632B8;
+// Image_Draw(Gfx** gfx, image, alpha, ...): draws an image from the 2D archive as texture rectangles at *gfx and
+// advances it. The display list head passed by the menus, HUD and cutscenes is D_800B9738.
+Image_Draw = 0x80063A10;
 
 // ---- level loading ----
 // Game_RunMission: plays the current mission's stage list from D_800A9868 on (mission intro first when starting at
