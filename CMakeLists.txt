@@ -55,6 +55,12 @@ apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-lookat-bounds.patch)
 # Keep game memory mapped at quit: the game's threads are never joined and crash if it's unmapped under them.
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime ${CMAKE_SOURCE_DIR}/patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch)
+# RecompFrontend never reads mouse buttons ("TODO mouse support"), so the default left/right mouse bindings for
+# shoot/aim did nothing. Read them alongside the keyboard state.
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/RecompFrontend ${CMAKE_SOURCE_DIR}/patches/deps/RecompFrontend-mouse-buttons.patch)
+# Cross-compiling for Windows from Linux (cmake/windows-cross-clang-cl.cmake, docs/WINDOWS_CROSS.md): a host-built
+# file_to_c, the Linux DXC for SPIR-V and the Windows dxc.exe under Wine for DXIL.
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-cross-compile-windows.patch)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
 
@@ -247,8 +253,15 @@ set (DXC_CS_OPTS "${DXC_COMMON_OPTS}" "-E" "CSMain" "-T cs_6_0")
 set (DXC_GS_OPTS "${DXC_COMMON_OPTS}" "-E" "GSMain" "-T gs_6_0")
 set (DXC_RT_OPTS "${DXC_COMMON_OPTS}" "-D" "RT_SHADER" "-T" "lib_6_3" "-fspv-target-env=vulkan1.1spirv1.4" "-fspv-extension=SPV_KHR_ray_tracing" "-fspv-extension=SPV_EXT_descriptor_indexing")
 
-if (${WIN32})
+if (${WIN32} AND CMAKE_HOST_WIN32)
     set (DXC "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc.exe")
+    add_compile_definitions(NOMINMAX)
+elseif (${WIN32})
+    # Cross-compiling for Windows from Linux: Linux DXC for SPIR-V, the Windows dxc.exe under Wine for DXIL so it matches
+    # the shipped dxcompiler.dll (see patches/deps/rt64-cross-compile-windows.patch).
+    set (DXC "LD_LIBRARY_PATH=${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/lib/x64" "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc-linux")
+    find_program(RT64_WINE NAMES wine64 wine HINTS /usr/lib/wine REQUIRED)
+    set (DXC_FOR_DXIL sh "${PROJECT_SOURCE_DIR}/lib/rt64/src/tools/dxc-wine.sh" "${RT64_WINE}" "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc.exe")
     add_compile_definitions(NOMINMAX)
 else()
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|AMD64")

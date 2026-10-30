@@ -1,0 +1,72 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 79dfc38..f6864ff 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -36,7 +36,16 @@ function(preprocess INFILE OUTFILE OPTIONS)
+ endfunction()
+ 
+ if (WIN32)
+-    set (DXC "${PROJECT_SOURCE_DIR}/src/contrib/dxc/bin/x64/dxc.exe")
++    if (CMAKE_HOST_WIN32)
++        set (DXC "${PROJECT_SOURCE_DIR}/src/contrib/dxc/bin/x64/dxc.exe")
++    else()
++        # Cross-compiling from Linux: run the Linux DXC build for SPIR-V. DXIL must come from the same DXC version as the
++        # dxcompiler.dll shipped with the game (D3D12 refuses to link the precompiled library shaders with shaders
++        # compiled at runtime otherwise), so run the Windows dxc.exe under Wine for it.
++        set (DXC "LD_LIBRARY_PATH=${PROJECT_SOURCE_DIR}/src/contrib/dxc/lib/x64" "${PROJECT_SOURCE_DIR}/src/contrib/dxc/bin/x64/dxc-linux")
++        find_program(RT64_WINE NAMES wine64 wine HINTS /usr/lib/wine REQUIRED)
++        set (DXC_FOR_DXIL sh "${PROJECT_SOURCE_DIR}/src/tools/dxc-wine.sh" "${RT64_WINE}" "${PROJECT_SOURCE_DIR}/src/contrib/dxc/bin/x64/dxc.exe")
++    endif()
+     add_compile_definitions(
+         NOMINMAX
+         __PRFCHWINTRIN_H
+@@ -69,7 +78,13 @@ set(ZSTD_LEGACY_SUPPORT OFF)
+ set(ZSTD_BUILD_STATIC ON)
+ set(ZSTD_BUILD_SHARED OFF)
+ 
+-add_subdirectory(src/tools/file_to_c)
++if (CMAKE_CROSSCOMPILING AND DEFINED RT64_HOST_FILE_TO_C)
++    # Cross-compiling: file_to_c runs during the build, so use a host-built copy.
++    add_executable(file_to_c IMPORTED GLOBAL)
++    set_target_properties(file_to_c PROPERTIES IMPORTED_LOCATION "${RT64_HOST_FILE_TO_C}")
++else()
++    add_subdirectory(src/tools/file_to_c)
++endif()
+ add_subdirectory(src/contrib/re-spirv)
+ add_subdirectory(src/contrib/nativefiledialog-extended)
+ add_subdirectory(src/contrib/zstd/build/cmake)
+@@ -125,8 +140,13 @@ function(build_shader_spirv_impl TARGETOBJ FILENAME TARGET_NAME OUTNAME)
+ endfunction()
+ 
+ function(build_shader_dxil_impl TARGETOBJ FILENAME TARGET_NAME OUTNAME)
++    if (DXC_FOR_DXIL)
++        set(DXC_DXIL_TOOL ${DXC_FOR_DXIL})
++    else()
++        set(DXC_DXIL_TOOL ${DXC})
++    endif()
+     add_custom_command(OUTPUT ${OUTNAME}.dxil
+-        COMMAND ${DXC} ${DXC_DXIL_OPTS} ${ARGN} ${FILENAME} /Fo ${OUTNAME}.dxil
++        COMMAND ${DXC_DXIL_TOOL} ${DXC_DXIL_OPTS} ${ARGN} ${FILENAME} /Fo ${OUTNAME}.dxil
+         DEPENDS ${FILENAME})
+     add_custom_command(OUTPUT ${OUTNAME}.dxil.c
+         COMMAND file_to_c ${OUTNAME}.dxil ${TARGET_NAME}BlobDXIL ${OUTNAME}.dxil.c ${OUTNAME}.dxil.h
+diff --git a/src/tools/dxc-wine.sh b/src/tools/dxc-wine.sh
+new file mode 100755
+index 0000000..ad5c7cb
+--- /dev/null
++++ b/src/tools/dxc-wine.sh
+@@ -0,0 +1,14 @@
++#!/bin/sh
++# Run the Windows dxc.exe under Wine, converting absolute Linux paths in its arguments to Wine's Z: drive.
++# Used when cross-compiling for Windows from Linux, so DXIL comes from the same DXC as the shipped dxcompiler.dll.
++# Usage: dxc-wine.sh <wine> <dxc.exe> [dxc arguments...]
++wine="$1"; dxc="$2"; shift 2
++for arg in "$@"; do
++    case "$arg" in
++        -I/*/*) arg="-IZ:$(printf '%s' "${arg#-I}" | tr '/' '\\')" ;;
++        /*/*)   arg="Z:$(printf '%s' "$arg" | tr '/' '\\')" ;;
++    esac
++    set -- "$@" "$arg"
++    shift
++done
++WINEDEBUG=-all exec "$wine" "$dxc" "$@"

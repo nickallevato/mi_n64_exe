@@ -17,7 +17,9 @@
 #include <cstring>
 #include <string>
 
+#ifndef _WIN32
 #include <execinfo.h>
+#endif
 
 #include "mi_game.h"
 
@@ -120,10 +122,11 @@ extern "C" void mi_stats_rom_read(uint32_t src, uint32_t dst, uint32_t size, uin
     }
     uint32_t retrace = 0;
     read_word(0x800A1F3C, retrace);
+    std::string callers;
+#ifndef _WIN32
     // Frames: this function, Rom_Read, its caller, that function's caller.
     void* frames[4];
     int count = backtrace(frames, 4);
-    std::string callers;
     if (char** names = backtrace_symbols(frames, count)) {
         for (int i = 2; i < count; i++) {
             std::string name = names[i];
@@ -132,6 +135,10 @@ extern "C" void mi_stats_rom_read(uint32_t src, uint32_t dst, uint32_t size, uin
         }
         std::free(names);
     }
+#else
+    // No execinfo on Windows; the caller names are left out of the log.
+    callers = " ? ?";
+#endif
     std::fprintf(dma_log, "%u %08X %08X %08X%s\n", retrace, src, dst, size, callers.c_str());
     std::fflush(dma_log);
 }
