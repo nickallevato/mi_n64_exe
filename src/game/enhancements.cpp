@@ -6,8 +6,28 @@
 
 #include "mi_config.h"
 
-// Minimum VIs per in-level frame: 2 = original 30 fps cap, 1 = 60 fps.
+// Game_LevelLoop's mode ($a2): bit 0 set for playable stages (1, 3), clear for scripted scenes (0) such as mission
+// intros. Scenes run at 25 fps: their scripts count frames between voice lines (the game comes from a PAL studio), so at
+// higher frame rates the next line starts before the current one ends (at 60 fps "Good luck, Jim" cut into the end of
+// Phelps' briefing in the Ice Hit intro).
+static bool scene_playing = false;
+
+extern "C" void mi_level_loop_start(uint32_t mode) {
+    scene_playing = (mode & 1) == 0;
+}
+
+bool mi::level_loop_is_scene() {
+    return scene_playing;
+}
+
+// Minimum VIs per in-level frame: 2 = original 30 fps cap, 1 = 60 fps. Scenes alternate 3 and 2 VIs (2.4 on average,
+// 25 fps at 60 Hz).
 extern "C" int mi_level_min_vis_per_frame() {
+    if (scene_playing) {
+        static const int scene_vis[] = { 3, 2, 3, 2, 2 };
+        static unsigned scene_frame = 0;
+        return scene_vis[scene_frame++ % 5];
+    }
     return mi::get_frame_rate() == mi::FrameRate::Fps60 ? 1 : 2;
 }
 

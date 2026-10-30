@@ -53,11 +53,12 @@ func = "Game_RunMission"
 before_vram = 0x80049AE0
 text = "{ int mi_level_warp_skip_menus(void); if (mi_level_warp_skip_menus()) ctx->r6 &= ~(gpr)2; }"
 
-# The warped stage is starting: later stages of the mission play with their normal menus.
+# The warped stage is starting: later stages of the mission play with their normal menus. Also records the loop mode
+# ($a2: 0 = scripted scene) for the 25 fps scene cap and the scenes' 4:3 framing (src/game/enhancements.cpp).
 [[patches.hook]]
 func = "Game_LevelLoop"
 before_vram = 0x80047CF8
-text = "{ void mi_level_warp_level_started(void); mi_level_warp_level_started(); }"
+text = "{ void mi_level_warp_level_started(void); void mi_level_loop_start(uint32_t); mi_level_warp_level_started(); mi_level_loop_start((uint32_t)ctx->r6); }"
 
 # Development: MI_DMA_LOG=file logs every Rom_Read(src, dst, size) call (src/main/debug_stats.cpp).
 [[patches.hook]]
@@ -71,6 +72,13 @@ text = "{ void mi_stats_rom_read(uint32_t, uint32_t, uint32_t, uint32_t); mi_sta
 func = "Image_Draw"
 before_vram = 0x80063A10
 text = "{ void mi_widescreen_image_draw(uint8_t*, uint32_t, uint32_t); mi_widescreen_image_draw(rdram, (uint32_t)ctx->r4, (uint32_t)ctx->r5); }"
+
+# Widescreen: scripted scenes keep their 4:3 framing. Gfx_SubmitTask($a0 = end of the frame's display list) closes
+# the list there; append black side bars first and pass the new end on.
+[[patches.hook]]
+func = "Gfx_SubmitTask"
+before_vram = 0x8006C0DC
+text = "{ uint32_t mi_widescreen_frame_end(uint8_t*, uint32_t); ctx->r4 = (gpr)(int32_t)mi_widescreen_frame_end(rdram, (uint32_t)ctx->r4); }"
 
 # Smooth root motion at 60 fps (src/game/enhancements.cpp): walking moves characters one animation keyframe step at
 # a time, and at 60 fps many frames don't reach a new keyframe. At the common exit ($t1 = animation state, $t3 = out
