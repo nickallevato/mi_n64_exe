@@ -54,6 +54,8 @@ namespace mi {
     CutsceneFraming get_cutscene_framing();
     // True while Game_LevelLoop is playing a scripted scene (mode 0) rather than a playable stage.
     bool level_loop_is_scene();
+    // True while that scene is the title screen's team introduction (TitleSceneStage).
+    bool level_loop_is_title_scene();
     bool get_analog_camera_enabled();
     // Degrees per second at full right stick deflection.
     float get_analog_camera_speed();

@@ -54,11 +54,12 @@ before_vram = 0x80049AE0
 text = "{ int mi_level_warp_skip_menus(void); if (mi_level_warp_skip_menus()) ctx->r6 &= ~(gpr)2; }"
 
 # The warped stage is starting: later stages of the mission play with their normal menus. Also records the loop mode
-# ($a2: 0 = scripted scene) for the 25 fps scene cap and the scenes' 4:3 framing (src/game/enhancements.cpp).
+# ($a2: 0 = scripted scene) and stage ($a0) for the 25 fps scene cap and the scenes' 4:3 framing
+# (src/game/enhancements.cpp).
 [[patches.hook]]
 func = "Game_LevelLoop"
 before_vram = 0x80047CF8
-text = "{ void mi_level_warp_level_started(void); void mi_level_loop_start(uint32_t); mi_level_warp_level_started(); mi_level_loop_start((uint32_t)ctx->r6); }"
+text = "{ void mi_level_warp_level_started(void); void mi_level_loop_start(uint32_t, uint32_t); mi_level_warp_level_started(); mi_level_loop_start((uint32_t)ctx->r6, (uint32_t)ctx->r4); }"
 
 # Development: MI_DMA_LOG=file logs every Rom_Read(src, dst, size) call (src/main/debug_stats.cpp).
 [[patches.hook]]

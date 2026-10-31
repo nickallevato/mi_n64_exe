@@ -79,7 +79,7 @@ Rebind anything in the **Controls** tab of the settings menu (**Esc** on the key
   rate their voice timing is made for. Resolution, MSAA and aspect ratio are on the same tab.
 - **Graphics > Cutscene Framing**: in widescreen, **4:3** (default) keeps cutscenes in their original frame with black
   bars; **Fill** keeps the original horizontal framing and fills the screen, trimming the top and bottom. Cutscenes on
-  the IMF handheld always stay 4:3.
+  the IMF handheld and the title screen's team introduction always stay 4:3.
 - **General > Mouse Sensitivity**: 50% by default. Set it to 0 to turn mouse turning off and free the cursor.
 - **General > Analog Camera / Analog Camera Speed**: turning with the right stick.
 - **General > Developer Tools**: shows a **Debug** tab with **Start in Level** (skip the intro and menus and start in

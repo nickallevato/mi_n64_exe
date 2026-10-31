@@ -141,8 +141,8 @@ static void add_graphics_options(recomp::config::Config &config) {
         "black bars at the sides, hiding the unfinished parts of the sets beyond it. "
         "<recomp-color primary>Fill</recomp-color> renders the original 4:3 view anamorphically and stretches it to fill "
         "the screen, keeping the original horizontal framing (the top and bottom of the picture are trimmed instead). "
-        "Fill needs the <recomp-color primary>Expand</recomp-color> aspect ratio. Cutscenes on the IMF handheld always "
-        "stay 4:3 with black bars.",
+        "Fill needs the <recomp-color primary>Expand</recomp-color> aspect ratio. Cutscenes on the IMF handheld and the "
+        "title screen's team introduction always stay 4:3 with black bars.",
         cutscene_framing_options,
         mi::CutsceneFraming::Pillarbox
     );

@@ -98,9 +98,11 @@ namespace {
         return height > 0 ? float(width) / float(height) : 0.0f;
     }
 
-    // Fill mode applies to this frame's scene camera.
+    // Fill mode applies to this frame's scene camera. Not in the title screen's team introduction: it mixes the scene
+    // camera (the burning fuse) with elements whose projection Fill doesn't change (the match and its letterboxed
+    // backdrop), which then no longer line up.
     bool scene_fill_active() {
-        return mi::level_loop_is_scene() && !bezel_last_frame &&
+        return mi::level_loop_is_scene() && !mi::level_loop_is_title_scene() && !bezel_last_frame &&
             mi::get_cutscene_framing() == mi::CutsceneFraming::Fill && expanded_aspect() > 4.0f / 3.0f;
     }
 }

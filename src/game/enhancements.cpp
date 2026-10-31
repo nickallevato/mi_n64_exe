@@ -11,13 +11,22 @@
 // higher frame rates the next line starts before the current one ends (at 60 fps "Good luck, Jim" cut into the end of
 // Phelps' briefing in the Ice Hit intro).
 static bool scene_playing = false;
+static bool title_scene_playing = false;
 
-extern "C" void mi_level_loop_start(uint32_t mode) {
+// TitleSceneStage: the team introduction played from the title screen.
+constexpr uint32_t title_scene_stage = 0x8008A880;
+
+extern "C" void mi_level_loop_start(uint32_t mode, uint32_t stage) {
     scene_playing = (mode & 1) == 0;
+    title_scene_playing = scene_playing && stage == title_scene_stage;
 }
 
 bool mi::level_loop_is_scene() {
     return scene_playing;
+}
+
+bool mi::level_loop_is_title_scene() {
+    return title_scene_playing;
 }
 
 // Minimum VIs per in-level frame: 2 = original 30 fps cap, 1 = 60 fps. Scenes alternate 3 and 2 VIs (2.4 on average,
