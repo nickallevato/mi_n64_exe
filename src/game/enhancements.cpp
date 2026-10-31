@@ -6,8 +6,41 @@
 
 #include "mi_config.h"
 
-// Minimum VIs per in-level frame: 2 = original 30 fps cap, 1 = 60 fps.
+// Game_LevelLoop's mode ($a2): bit 0 set for playable stages (1, 3), clear for scripted scenes (0) such as mission
+// intros. Mission scenes run at 25 fps: their scripts count frames between voice lines (the game comes from a PAL
+// studio), so at higher frame rates the next line starts before the current one ends (at 60 fps "Good luck, Jim" cut into
+// the end of Phelps' briefing in the Ice Hit intro). The title screen's team introduction runs at 30 fps: it is paced in
+// frames for 30, and at 60 it ends too soon.
+static bool scene_playing = false;
+static bool title_scene_playing = false;
+
+// TitleSceneStage: the team introduction played from the title screen.
+constexpr uint32_t title_scene_stage = 0x8008A880;
+
+extern "C" void mi_level_loop_start(uint32_t mode, uint32_t stage) {
+    scene_playing = (mode & 1) == 0;
+    title_scene_playing = scene_playing && stage == title_scene_stage;
+}
+
+bool mi::level_loop_is_scene() {
+    return scene_playing;
+}
+
+bool mi::level_loop_is_title_scene() {
+    return title_scene_playing;
+}
+
+// Minimum VIs per in-level frame: 2 = original 30 fps cap, 1 = 60 fps. Mission scenes alternate 3 and 2 VIs (2.4 on
+// average, 25 fps at 60 Hz); the title screen's introduction takes 2 (30 fps).
 extern "C" int mi_level_min_vis_per_frame() {
+    if (title_scene_playing) {
+        return 2;
+    }
+    if (scene_playing) {
+        static const int scene_vis[] = { 3, 2, 3, 2, 2 };
+        static unsigned scene_frame = 0;
+        return scene_vis[scene_frame++ % 5];
+    }
     return mi::get_frame_rate() == mi::FrameRate::Fps60 ? 1 : 2;
 }
 

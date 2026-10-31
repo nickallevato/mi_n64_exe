@@ -33,6 +33,17 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       speed is unchanged (verified by comparing 30/60 FPS runs). Graphics > Frame Rate, default 60.
 - [x] Upgraded graphics: RT64 renders at window resolution with MSAA and widescreen "Expand" by default
       (compared against native 240p 4:3 at the same moment). HUD stays 16:9-clamped.
+- [x] Widescreen: scripted scenes (Game_LevelLoop mode 0, e.g. mission intros) keep their 4:3 framing with black side
+      bars, so the unmodelled parts of the sets outside the original frame stay hidden; the IMF handheld's bezel gets the
+      same bars wherever it is drawn. Gameplay keeps the expanded view. Verified on the Ice Hit intro. Graphics > Cutscene
+      Framing "Fill" instead narrows the scene camera's vertical field of view so the expanded view keeps the original
+      horizontal framing (top and bottom trimmed); handheld scenes stay 4:3. The sniper scope (Waterloo Station,
+      Mainland) gets the same bars, both when the player aims and in scripted shots. The screen fade (to and from black, e.g.
+      behind "THE END") covers the whole screen instead of only the 4:3 frame, and full-screen pictures
+      (Image_ShowScreen, e.g. "THE END") get black side bars instead of the level's fog color
+- [x] Mission scenes run at 25 fps whatever the frame rate setting: their scripts time voice lines in frames, so at
+      60 fps "Good luck, Jim" started before Phelps' briefing finished. The title screen's team introduction runs at
+      30 fps, the rate its pacing is made for
 - [ ] Ultrawide polish (culling at extreme aspect ratios not checked)
 - [x] Analog camera: right stick turns Ethan (and the camera behind him) at a configurable rate and tilts the
       first-person view; right stick removed from the C-button defaults. General > Analog Camera (default on)
