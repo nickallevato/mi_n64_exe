@@ -75,8 +75,9 @@ Rebind anything in the **Controls** tab of the settings menu (**Esc** on the key
 
 ## Settings
 
-- **Graphics > Frame Rate**: 60 FPS (default) or Original (30) during gameplay; cutscenes always run at 25 FPS, the
-  rate their voice timing is made for. Resolution, MSAA and aspect ratio are on the same tab.
+- **Graphics > Frame Rate**: 60 FPS (default) or Original (30) during gameplay and the title screen's introduction;
+  mission cutscenes always run at 25 FPS, the rate their voice timing is made for. Resolution, MSAA and aspect ratio are
+  on the same tab.
 - **Graphics > Cutscene Framing**: in widescreen, **4:3** (default) keeps cutscenes in their original frame with black
   bars; **Fill** keeps the original horizontal framing and fills the screen, trimming the top and bottom. Cutscenes on
   the IMF handheld and the title screen's team introduction always stay 4:3.

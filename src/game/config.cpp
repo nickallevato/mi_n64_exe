@@ -125,7 +125,7 @@ static void add_graphics_options(recomp::config::Config &config) {
         "Frame Rate",
         "Frame rate cap during gameplay. The game times its logic by the video clock, so "
         "<recomp-color primary>60 FPS</recomp-color> plays at normal speed. <recomp-color primary>Original</recomp-color> "
-        "matches the N64's 30 FPS cap. Cutscenes always run at 25 FPS, which their voice timing is made for.",
+        "matches the N64's 30 FPS cap. Mission cutscenes always run at 25 FPS, which their voice timing is made for.",
         frame_rate_options,
         mi::FrameRate::Fps60
     );
@@ -244,8 +244,9 @@ static void set_control_descriptions() {
 }
 
 // RecompFrontend's mouse sensitivity defaults to 0 (mouse aiming off) outside the Steam Deck. Turn it on for new
-// installs by giving it a default when the saved general config doesn't have a value yet.
-static void apply_mouse_default() {
+// installs: if the saved general config has no value yet, use 50% and save it. This has to be checked before the configs
+// load, because loading writes a missing config file with the defaults (mouse sensitivity 0).
+static bool saved_mouse_sensitivity_exists() {
     std::ifstream file{ recompui::file::get_app_folder_path() / "general.json" };
     nlohmann::json saved = nlohmann::json::object();
     if (file.good()) {
@@ -256,8 +257,14 @@ static void apply_mouse_default() {
             saved = nlohmann::json::object();
         }
     }
-    if (!saved.contains(recompui::config::general::options::mouse_sensitivity)) {
-        recompui::config::get_general_config().set_option_value(recompui::config::general::options::mouse_sensitivity, 50.0);
+    return saved.is_object() && saved.contains(recompui::config::general::options::mouse_sensitivity);
+}
+
+static void apply_mouse_default(bool saved_value_existed) {
+    if (!saved_value_existed) {
+        auto &general_config = recompui::config::get_general_config();
+        general_config.set_option_value(recompui::config::general::options::mouse_sensitivity, 50.0);
+        general_config.save_config();
     }
 }
 
@@ -282,9 +289,10 @@ void mi::init_config() {
     recompui::config::create_mods_tab();
     // Creating a tab can move the other tabs' configs, so look configs up by id after this point.
     add_debug_options(recompui::config::create_config_tab("Debug", mi::configkeys::debug::id, false));
+    const bool mouse_sensitivity_saved = saved_mouse_sensitivity_exists();
     recompui::config::finalize();
     debug_config_created = true;
-    apply_mouse_default();
+    apply_mouse_default(mouse_sensitivity_saved);
 
     // The Debug tab only shows while General > Developer Tools is on.
     recompui::config::set_tab_visible(mi::configkeys::debug::id, developer_tools_enabled());
