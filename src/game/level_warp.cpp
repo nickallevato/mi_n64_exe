@@ -205,20 +205,26 @@ static void warp_to(uint8_t* rdram, recomp_context* ctx, int mission, int stage,
     std::fprintf(stderr, "Level warp: mission over, continuing to the title screen\n");
 }
 
-// Debug > Unlock All Levels: set the unlocked flag (0x01) on every stage the mission menu can show, like the
-// GameShark level codes. Hidden stages (flags 0xE0: cutscenes, continuations, test levels) stay hidden.
+// Debug > Unlock All Levels: set the unlocked flag (0x01) like the GameShark level codes (scripts/level_test.sh): on
+// every mission entry, so its levels show in the mission menu (without it, CIA Escape and Mole Hunt never showed a
+// level and later missions read "ACCESS DENIED"), and on every stage entry except non-interactive scenes (0x80),
+// including the hidden continuation parts (0x20/0x40) that multi-part levels run straight into.
 void mi::levels_on_vi() {
     uint8_t* rdram = mi::game_rdram();
     if (rdram == nullptr || !mi::get_unlock_all_levels()) {
         return;
     }
+    auto unlock = [rdram](uint32_t entry) {
+        uint32_t flags = entry + 2;
+        uint8_t value = ram_u8(rdram, flags);
+        if ((value & 0x80) == 0 && (value & 0x01) == 0) {
+            ram_w8(rdram, flags, value | 0x01);
+        }
+    };
     for (int m = 0; m < mission_count(rdram); m++) {
+        unlock(MISSION_TABLE + m * ENTRY_SIZE);
         for (int s = 0; s < stage_count(rdram, m); s++) {
-            uint32_t flags = stage_list(rdram, m) + s * ENTRY_SIZE + 2;
-            uint8_t value = ram_u8(rdram, flags);
-            if ((value & 0xE0) == 0 && (value & 0x01) == 0) {
-                ram_w8(rdram, flags, value | 0x01);
-            }
+            unlock(stage_list(rdram, m) + s * ENTRY_SIZE);
         }
     }
 }

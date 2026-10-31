@@ -55,6 +55,9 @@ apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-lookat-bounds.patch)
 # Keep game memory mapped at quit: the game's threads are never joined and crash if it's unmapped under them.
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime ${CMAKE_SOURCE_DIR}/patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch)
+# Settings with many options (Debug > Start in Level) squeezed every option onto one row until the names overlapped:
+# let the options keep their width and wrap onto more rows.
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/RecompFrontend ${CMAKE_SOURCE_DIR}/patches/deps/RecompFrontend-radio-wrap.patch)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
 

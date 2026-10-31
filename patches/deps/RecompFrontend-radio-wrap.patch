@@ -1,0 +1,24 @@
+diff --git a/recompui/src/elements/ui_radio.cpp b/recompui/src/elements/ui_radio.cpp
+index 7e5c18d..9898d4b 100644
+--- a/recompui/src/elements/ui_radio.cpp
++++ b/recompui/src/elements/ui_radio.cpp
+@@ -19,6 +19,9 @@ namespace recompui {
+         set_padding_top(8.0f);
+         set_padding_bottom(8.0f - theme::border::width);
+         set_text_transform(TextTransform::Uppercase);
++        // Keep each option on one line at its natural width; the row wraps instead (see Radio::Radio).
++        set_white_space(WhiteSpace::Nowrap);
++        set_flex_shrink(0.0f);
+         set_height_auto();
+         set_opacity(1.0f);
+         hover_style.set_color(theme::color::WhiteA80);
+@@ -128,6 +131,9 @@ namespace recompui {
+ 
+     Radio::Radio(ResourceId rid, Element *parent) : Container(rid, parent, FlexDirection::Row, JustifyContent::FlexStart, Events(EventType::Focus, EventType::Update, EventType::Enable)) {
+         set_gap(24.0f);
++        // Options that don't fit on one row wrap onto the next instead of being squeezed until their text overlaps.
++        set_flex_wrap(FlexWrap::Wrap);
++        set_row_gap(4.0f);
+         set_align_items(AlignItems::FlexStart);
+         // enable_focus();
+         set_as_navigation_container(NavigationType::Horizontal);

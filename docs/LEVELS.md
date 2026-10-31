@@ -76,7 +76,8 @@ next stage. An invalid value is logged and the game boots normally.
 
 **General > Developer Tools** shows a **Debug** tab with the same tools for players and modders, no command line
 needed: **Start in Level** (any of the 20 menu levels; applies at launch, and when the game returns to the title if
-the choice changed), **Unlock All Levels** (sets the unlocked flag on every menu stage each frame) and **Load Data
+the choice changed), **Unlock All Levels** (sets the unlocked flag on every mission and every non-scene stage each frame, like the
+GameShark codes in `scripts/level_test.sh`) and **Load Data
 Overrides** (reads `rom_XXXXXXXX.bin` files from the `overrides` folder in the app's config folder,
 `~/.config/MIRecompiled/overrides` on Linux). `MI_LEVEL` and `MI_OVERRIDE_DIR` take precedence.
 
