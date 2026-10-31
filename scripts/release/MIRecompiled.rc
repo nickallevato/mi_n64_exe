@@ -1,0 +1,3 @@
+// Windows resources: the app icon (scripts/release/icon.png as .ico) for the exe, its shortcuts and the game window.
+// SDL uses the first icon in the exe for its windows.
+1 ICON "icon.ico"

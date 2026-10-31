@@ -85,6 +85,45 @@ func = "Audio_HandleFrame"
 before_vram = 0x80072774
 text = "{ void mi_audio_clamp_frame_samples(uint8_t*, uint32_t); mi_audio_clamp_frame_samples(rdram, (uint32_t)ctx->r16); }"
 
+# Collision bounds null check (src/game/enhancements.cpp): moving or turning an object of type 1 updates its collision
+# bounds through obj+0x4, then follows obj+0x4 to an attached object (+0xAC, null if none). That pointer was invalid for
+# a destroyed sea mine on Gunboat. Skip the bounds update, and read the attached object as none ($v0 = obj+0x4 just
+# loaded, before the +0xAC load).
+[[patches.hook]]
+func = "Collision_UpdateBounds"
+before_vram = 0x80028934
+text = "{ int mi_collision_bounds_valid(uint32_t); if (!mi_collision_bounds_valid((uint32_t)ctx->r4)) { return; } }"
+
+[[patches.hook]]
+func = "func_80003A48"
+before_vram = 0x80003AE8
+text = "{ uint32_t mi_collision_bounds_or_empty(uint32_t); ctx->r2 = (gpr)(int32_t)mi_collision_bounds_or_empty((uint32_t)ctx->r2); }"
+
+[[patches.hook]]
+func = "Object_SetYaw"
+before_vram = 0x80003BC4
+text = "{ uint32_t mi_collision_bounds_or_empty(uint32_t); ctx->r2 = (gpr)(int32_t)mi_collision_bounds_or_empty((uint32_t)ctx->r2); }"
+
+[[patches.hook]]
+func = "func_80003C28"
+before_vram = 0x80003CEC
+text = "{ uint32_t mi_collision_bounds_or_empty(uint32_t); ctx->r2 = (gpr)(int32_t)mi_collision_bounds_or_empty((uint32_t)ctx->r2); }"
+
+[[patches.hook]]
+func = "func_80003C28"
+before_vram = 0x80003D54
+text = "{ uint32_t mi_collision_bounds_or_empty(uint32_t); ctx->r2 = (gpr)(int32_t)mi_collision_bounds_or_empty((uint32_t)ctx->r2); }"
+
+[[patches.hook]]
+func = "func_80004640"
+before_vram = 0x800049BC
+text = "{ uint32_t mi_collision_bounds_or_empty(uint32_t); ctx->r2 = (gpr)(int32_t)mi_collision_bounds_or_empty((uint32_t)ctx->r2); }"
+
+[[patches.hook]]
+func = "func_80004640"
+before_vram = 0x80004CC8
+text = "{ uint32_t mi_collision_bounds_or_empty(uint32_t); ctx->r2 = (gpr)(int32_t)mi_collision_bounds_or_empty((uint32_t)ctx->r2); }"
+
 # Mouse turning outside aim mode (src/game/mouse.cpp): applied to Ethan's yaw at the start of player control.
 [[patches.hook]]
 func = "Player_Control"

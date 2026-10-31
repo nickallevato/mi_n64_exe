@@ -1,0 +1,55 @@
+diff --git a/recompinput/src/input_state.cpp b/recompinput/src/input_state.cpp
+index 03ed871..daca021 100644
+--- a/recompinput/src/input_state.cpp
++++ b/recompinput/src/input_state.cpp
+@@ -18,6 +18,7 @@ static struct {
+     const Uint8* keys = nullptr;
+     SDL_Keymod keymod = SDL_Keymod::KMOD_NONE;
+     int numkeys = 0;
++    Uint32 mouse_buttons = 0;
+     std::atomic_int32_t mouse_wheel_pos = 0;
+     std::mutex controllers_mutex;
+     std::vector<SDL_GameController*> detected_controllers{};
+@@ -34,6 +35,7 @@ static struct {
+ void recompinput::poll_inputs() {
+     InputState.keys = SDL_GetKeyboardState(&InputState.numkeys);
+     InputState.keymod = SDL_GetModState();
++    InputState.mouse_buttons = SDL_GetMouseState(nullptr, nullptr);
+     static bool first_poll = true;
+ 
+     {
+@@ -215,6 +217,14 @@ bool recompinput::should_override_keystate(SDL_Scancode key, SDL_Keymod mod) {
+     return false;
+ }
+ 
++// Mouse buttons (SDL_BUTTON_LEFT etc.), as of the last poll_inputs.
++static bool mouse_button_state(int button) {
++    if (button < 1 || button > 32) {
++        return false;
++    }
++    return (InputState.mouse_buttons & SDL_BUTTON(button)) != 0;
++}
++
+ float recompinput::get_input_analog(int controller_num, const InputField& field) {
+     switch (field.input_type) {
+     case InputType::Keyboard:
+@@ -230,8 +240,7 @@ float recompinput::get_input_analog(int controller_num, const InputField& field)
+     case InputType::ControllerAnalog:
+         return controller_axis_state(controller_num, field.input_id, true);
+     case InputType::Mouse:
+-        // TODO mouse support
+-        return 0.0f;
++        return mouse_button_state(field.input_id) ? 1.0f : 0.0f;
+     case InputType::None:
+         return false;
+     }
+@@ -261,8 +270,7 @@ bool recompinput::get_input_digital(int controller_num, const InputField& field)
+         // TODO adjustable threshold
+         return controller_axis_state(controller_num, field.input_id, true) >= recompinput::axis_digital_threshold;
+     case InputType::Mouse:
+-        // TODO mouse support
+-        return false;
++        return mouse_button_state(field.input_id);
+     case InputType::None:
+         return false;
+     }
