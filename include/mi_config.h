@@ -9,6 +9,7 @@ namespace mi {
             inline const std::string analog_camera = "analog_camera";
             inline const std::string analog_camera_speed = "analog_camera_speed";
             inline const std::string developer_tools = "developer_tools";
+            inline const std::string easy_terminal_room = "easy_terminal_room";
         }
         namespace debug {
             inline const std::string id = "debug";
@@ -31,6 +32,11 @@ namespace mi {
         On,
     };
 
+    enum class EasyTerminalRoom {
+        Off,
+        On,
+    };
+
     enum class DeveloperTools {
         Off,
         On,
@@ -45,6 +51,8 @@ namespace mi {
     void init_config();
     FrameRate get_frame_rate();
     bool get_analog_camera_enabled();
+    // General > Frustration-free Terminal Room: the card reader and computer start at Ethan's height callouts.
+    bool get_easy_terminal_room();
     // Degrees per second at full right stick deflection.
     float get_analog_camera_speed();
 
