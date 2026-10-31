@@ -88,6 +88,18 @@ func = "Sniper_DrawScope"
 before_vram = 0x8003AF08
 text = "{ void mi_widescreen_sniper_frame(void); mi_widescreen_sniper_frame(); }"
 
+# Widescreen: full-screen 4:3 pictures shown by Image_ShowScreen (e.g. "THE END") get black side bars instead of the
+# level's fog color, which the frame is cleared with, beside them. The 0xFA path (a picture over the 3D scene) doesn't.
+[[patches.hook]]
+func = "Image_ShowScreen"
+before_vram = 0x8003B8C4
+text = "{ void mi_widescreen_image_screen(int); mi_widescreen_image_screen(1); }"
+
+[[patches.hook]]
+func = "Image_ShowScreen"
+before_vram = 0x8003BA10
+text = "{ void mi_widescreen_image_screen(int); mi_widescreen_image_screen(0); }"
+
 # Widescreen: the screen fade (fade to/from black, e.g. behind "THE END") is a 4:3 rectangle, so the expanded view showed
 # the scene beside it. Stretch it to the screen edges.
 [[patches.hook]]

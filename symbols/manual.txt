@@ -65,6 +65,9 @@ Sniper_DrawScope = 0x8003AF08;
 // Screen_DrawFade(Gfx** gfx): steps the screen fade (alpha D_80093CC0, per-frame step D_80093CC4) and draws it as a
 // black 4:3 rectangle (func_80056300) while the alpha is above 0.
 Screen_DrawFade = 0x800332D4;
+// Image_ShowScreen(image, ...): shows a full-screen picture from the 2D archive in its own frame loop, with fades, until
+// the player presses a button or it times out (e.g. "THE END"). Image 0xFA instead plays a letterboxed 3D sequence.
+Image_ShowScreen = 0x8003B738;
 // Script command handler: enters the special aim state (player flag 0x100000) and resets the aim variables.
 Player_EnterScriptedAim = 0x8003D844;
 // Moves an object for this frame (called from Object_UpdateAll): root motion from its model's animations

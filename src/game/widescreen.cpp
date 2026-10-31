@@ -108,6 +108,9 @@ namespace {
     // The sniper scope (Waterloo Station, Mainland) was drawn in this frame, by the player or a scripted shot.
     bool sniper_this_frame = false;
 
+    // Image_ShowScreen is showing a full-screen picture.
+    bool image_screen_active = false;
+
     // Width / height of the area RT64 renders the 3D scene into, or 0 if it doesn't expand past 4:3.
     float expanded_aspect() {
         const ultramodern::renderer::GraphicsConfig& config = ultramodern::renderer::get_graphics_config();
@@ -146,7 +149,7 @@ extern "C" void mi_widescreen_image_draw(uint8_t* rdram, uint32_t gfx_ptr_addr, 
 // that were never meant to be seen). In Fill mode the camera already shows only the original left-right view.
 // Returns the new end.
 extern "C" uint32_t mi_widescreen_frame_end(uint8_t* rdram, uint32_t gfx_end) {
-    bool bars = (mi::level_loop_is_scene() && !scene_fill_active()) || sniper_this_frame;
+    bool bars = (mi::level_loop_is_scene() && !scene_fill_active()) || sniper_this_frame || image_screen_active;
     bezel_last_frame = bezel_this_frame;
     bezel_this_frame = false;
     sniper_this_frame = false;
@@ -156,6 +159,12 @@ extern "C" uint32_t mi_widescreen_frame_end(uint8_t* rdram, uint32_t gfx_end) {
 
     uint32_t* start = ram_u32_ptr(rdram, gfx_end);
     return gfx_end + uint32_t(write_side_bars(start) - start) * sizeof(uint32_t);
+}
+
+// Hooks in Image_ShowScreen around the frames of a full-screen picture (e.g. "THE END"): the frame is cleared with the
+// level's fog color across the expanded screen and the picture only covers 4:3, so the frames get the bars.
+extern "C" void mi_widescreen_image_screen(int active) {
+    image_screen_active = active != 0;
 }
 
 // Hook at the start of Sniper_DrawScope, which draws the sniper scope's mask (image 0xA8, a quarter circle drawn four
