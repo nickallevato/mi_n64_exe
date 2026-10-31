@@ -145,7 +145,7 @@ static void add_graphics_options(recomp::config::Config &config) {
         "Fill needs the <recomp-color primary>Expand</recomp-color> aspect ratio. Cutscenes on the IMF handheld and the "
         "title screen's team introduction always stay 4:3 with black bars.",
         cutscene_framing_options,
-        mi::CutsceneFraming::Pillarbox
+        mi::CutsceneFraming::Fill
     );
 }
 
