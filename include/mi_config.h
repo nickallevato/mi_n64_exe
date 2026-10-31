@@ -18,12 +18,19 @@ namespace mi {
         }
         namespace graphics {
             inline const std::string frame_rate = "frame_rate";
+            inline const std::string cutscene_framing = "cutscene_framing";
         }
     }
 
     enum class FrameRate {
         Original, // 30 fps in levels, like the N64
         Fps60,
+    };
+
+    // How scripted scenes fill a widescreen window.
+    enum class CutsceneFraming {
+        Pillarbox, // original 4:3 view with black side bars
+        Fill,      // original left-right view, cropped top and bottom to fill the window
     };
 
     enum class AnalogCamera {
@@ -44,6 +51,7 @@ namespace mi {
 
     void init_config();
     FrameRate get_frame_rate();
+    CutsceneFraming get_cutscene_framing();
     // True while Game_LevelLoop is playing a scripted scene (mode 0) rather than a playable stage.
     bool level_loop_is_scene();
     bool get_analog_camera_enabled();

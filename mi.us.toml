@@ -80,6 +80,18 @@ func = "Gfx_SubmitTask"
 before_vram = 0x8006C0DC
 text = "{ uint32_t mi_widescreen_frame_end(uint8_t*, uint32_t); ctx->r4 = (gpr)(int32_t)mi_widescreen_frame_end(rdram, (uint32_t)ctx->r4); }"
 
+# Widescreen "Fill" cutscene framing: narrow the scene camera's vertical field of view ($a2 = fovy float bits). The main
+# camera uses guPerspectiveF; guPerspective has its own caller.
+[[patches.hook]]
+func = "guPerspectiveF"
+before_vram = 0x80074790
+text = "{ uint32_t mi_widescreen_perspective(uint32_t); ctx->r6 = (gpr)(int32_t)mi_widescreen_perspective((uint32_t)ctx->r6); }"
+
+[[patches.hook]]
+func = "guPerspective"
+before_vram = 0x80074940
+text = "{ uint32_t mi_widescreen_perspective(uint32_t); ctx->r6 = (gpr)(int32_t)mi_widescreen_perspective((uint32_t)ctx->r6); }"
+
 # Smooth root motion at 60 fps (src/game/enhancements.cpp): walking moves characters one animation keyframe step at
 # a time, and at 60 fps many frames don't reach a new keyframe. At the common exit ($t1 = animation state, $t3 = out
 # vector, X/Z already stored), add the partial step for the fraction of a keyframe played.

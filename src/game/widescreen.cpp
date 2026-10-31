@@ -1,8 +1,19 @@
 // Widescreen fixes that need extra draw commands in the game's display list (RT64 extended GBI): black bars outside
 // the original 4:3 frame in scripted scenes, and beside the IMF handheld's bezel.
+#include <cmath>
 #include <cstdint>
+#include <cstring>
+
+#ifdef _WIN32
+#include "SDL.h"
+#else
+#include "SDL2/SDL.h"
+#endif
+#include "ultramodern/config.hpp"
 
 #include "mi_config.h"
+
+extern SDL_Window* window;  // src/main/main.cpp
 
 // The in-engine cutscenes shown on the IMF handheld (e.g. the Ice Hit intro after Phelps opens his briefcase) draw
 // the 3D scene full screen, then the handheld's bezel on top as four 2D images (0xA9 top, 0xAA left, 0xAB right,
@@ -67,6 +78,30 @@ namespace {
     }
 }
 
+namespace {
+    // The handheld's bezel was drawn in this frame / the previous one. Handheld scenes stay 4:3 in Fill mode: the
+    // bezel is a 4:3 image. The projection is set before the bezel is drawn, so it goes by the previous frame.
+    bool bezel_this_frame = false;
+    bool bezel_last_frame = false;
+
+    // Width / height of the area RT64 renders the 3D scene into, or 0 if it doesn't expand past 4:3.
+    float expanded_aspect() {
+        const ultramodern::renderer::GraphicsConfig& config = ultramodern::renderer::get_graphics_config();
+        if (config.ar_option != ultramodern::renderer::AspectRatio::Expand) {
+            return 0.0f;
+        }
+        int width = 0, height = 0;
+        SDL_GetWindowSize(window, &width, &height);
+        return height > 0 ? float(width) / float(height) : 0.0f;
+    }
+
+    // Fill mode applies to this frame's scene camera.
+    bool scene_fill_active() {
+        return mi::level_loop_is_scene() && !bezel_last_frame &&
+            mi::get_cutscene_framing() == mi::CutsceneFraming::Fill && expanded_aspect() > 4.0f / 3.0f;
+    }
+}
+
 // Hook at the start of the 2D image draw (Image_Draw(Gfx** gfx, image, alpha, ...)), which writes its commands at *gfx
 // and advances it. The next draw sets its own cycle type and combiner, so the fill mode set here doesn't leak.
 extern "C" void mi_widescreen_image_draw(uint8_t* rdram, uint32_t gfx_ptr_addr, uint32_t image) {
@@ -74,6 +109,7 @@ extern "C" void mi_widescreen_image_draw(uint8_t* rdram, uint32_t gfx_ptr_addr, 
         return;
     }
 
+    bezel_this_frame = true;
     uint32_t* gfx_ptr = ram_u32_ptr(rdram, gfx_ptr_addr);
     uint32_t* start = ram_u32_ptr(rdram, *gfx_ptr);
     *gfx_ptr += uint32_t(write_side_bars(start) - start) * sizeof(uint32_t);
@@ -81,12 +117,34 @@ extern "C" void mi_widescreen_image_draw(uint8_t* rdram, uint32_t gfx_ptr_addr, 
 
 // Hook at the start of Gfx_SubmitTask(Gfx* end), which closes the frame's display list at `end`: during scripted
 // scenes, draw the bars last so the scene keeps its original 4:3 framing (the expanded view shows parts of the set
-// that were never meant to be seen). Returns the new end.
+// that were never meant to be seen). In Fill mode the camera already shows only the original left-right view.
+// Returns the new end.
 extern "C" uint32_t mi_widescreen_frame_end(uint8_t* rdram, uint32_t gfx_end) {
-    if (!mi::level_loop_is_scene()) {
+    bool bars = mi::level_loop_is_scene() && !scene_fill_active();
+    bezel_last_frame = bezel_this_frame;
+    bezel_this_frame = false;
+    if (!bars) {
         return gfx_end;
     }
 
     uint32_t* start = ram_u32_ptr(rdram, gfx_end);
     return gfx_end + uint32_t(write_side_bars(start) - start) * sizeof(uint32_t);
+}
+
+// Hook at the start of guPerspectiveF / guPerspective(m, perspNorm, fovy, aspect, ...): $a2 holds fovy (degrees) as
+// float bits. In Fill mode, narrow the scene camera's vertical field of view so that RT64's "Expand" (which widens the
+// view to the window's aspect at the same vertical field of view) lands on the original 4:3 left-right view, with the
+// top and bottom cropped. Returns the (possibly new) fovy bits.
+extern "C" uint32_t mi_widescreen_perspective(uint32_t fovy_bits) {
+    if (!scene_fill_active()) {
+        return fovy_bits;
+    }
+
+    float fovy;
+    std::memcpy(&fovy, &fovy_bits, sizeof(fovy));
+    const float scale = (4.0f / 3.0f) / expanded_aspect();
+    const float half = fovy * 0.5f * float(M_PI) / 180.0f;
+    fovy = 2.0f * std::atan(std::tan(half) * scale) * 180.0f / float(M_PI);
+    std::memcpy(&fovy_bits, &fovy, sizeof(fovy));
+    return fovy_bits;
 }

@@ -123,11 +123,28 @@ static void add_graphics_options(recomp::config::Config &config) {
     config.add_enum_option(
         mi::configkeys::graphics::frame_rate,
         "Frame Rate",
-        "Frame rate cap during gameplay and in-engine cutscenes. The game times its logic by the video clock, so "
+        "Frame rate cap during gameplay. The game times its logic by the video clock, so "
         "<recomp-color primary>60 FPS</recomp-color> plays at normal speed. <recomp-color primary>Original</recomp-color> "
-        "matches the N64's 30 FPS cap.",
+        "matches the N64's 30 FPS cap. Cutscenes always run at 25 FPS, which their voice timing is made for.",
         frame_rate_options,
         mi::FrameRate::Fps60
+    );
+
+    static EnumOptionVector cutscene_framing_options = {
+        {mi::CutsceneFraming::Pillarbox, "Pillarbox", "4:3"},
+        {mi::CutsceneFraming::Fill, "Fill", "Fill"},
+    };
+    config.add_enum_option(
+        mi::configkeys::graphics::cutscene_framing,
+        "Cutscene Framing",
+        "How cutscenes use a widescreen display. <recomp-color primary>4:3</recomp-color> shows the original view with "
+        "black bars at the sides, hiding the unfinished parts of the sets beyond it. "
+        "<recomp-color primary>Fill</recomp-color> renders the original 4:3 view anamorphically and stretches it to fill "
+        "the screen, keeping the original horizontal framing (the top and bottom of the picture are trimmed instead). "
+        "Fill needs the <recomp-color primary>Expand</recomp-color> aspect ratio. Cutscenes on the IMF handheld always "
+        "stay 4:3 with black bars.",
+        cutscene_framing_options,
+        mi::CutsceneFraming::Pillarbox
     );
 }
 
@@ -187,6 +204,10 @@ float mi::get_analog_camera_speed() {
 
 mi::FrameRate mi::get_frame_rate() {
     return get_graphics_config_enum_value<mi::FrameRate>(mi::configkeys::graphics::frame_rate);
+}
+
+mi::CutsceneFraming mi::get_cutscene_framing() {
+    return get_graphics_config_enum_value<mi::CutsceneFraming>(mi::configkeys::graphics::cutscene_framing);
 }
 
 // Keyboard + mouse defaults (only used until the player saves their own bindings).
