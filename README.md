@@ -79,6 +79,8 @@ Rebind anything in the **Controls** tab of the settings menu (**Esc** on the key
   same tab.
 - **General > Mouse Sensitivity**: 50% by default. Set it to 0 to turn mouse turning off and free the cursor.
 - **General > Analog Camera / Analog Camera Speed**: turning with the right stick.
+- **General > Frustration-free Terminal Room** (off by default): in the CIA's Terminal Room, the card reader and the
+  computer start as soon as Ethan calls out that he's at the right height, without lining him up to face them.
 - **General > Developer Tools**: shows a **Debug** tab with **Start in Level** (skip the intro and menus and start in
   any level), **Unlock All Levels**, and **Load Data Overrides** (edited level data from the `overrides` folder next
   to your settings; see [docs/LEVELS.md](docs/LEVELS.md)).

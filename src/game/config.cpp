@@ -36,6 +36,19 @@ static void add_general_options(recomp::config::Config &config) {
         mi::AnalogCamera::Off
     );
 
+    static EnumOptionVector easy_terminal_room_options = {
+        {mi::EasyTerminalRoom::Off, "Off", "Off"},
+        {mi::EasyTerminalRoom::On, "On", "On"},
+    };
+    config.add_enum_option(
+        mi::configkeys::general::easy_terminal_room,
+        "Frustration-free Terminal Room",
+        "In the CIA's Terminal Room, use the card reader and the computer as soon as Ethan says he's at the right "
+        "height for them, without lining him up. Takes effect the next time the level starts.",
+        easy_terminal_room_options,
+        mi::EasyTerminalRoom::Off
+    );
+
     static EnumOptionVector developer_tools_options = {
         {mi::DeveloperTools::Off, "Off", "Off"},
         {mi::DeveloperTools::On, "On", "On"},
@@ -179,6 +192,10 @@ std::string mi::get_overrides_dir() {
 
 bool mi::get_analog_camera_enabled() {
     return get_general_config_enum_value<mi::AnalogCamera>(mi::configkeys::general::analog_camera) == mi::AnalogCamera::On;
+}
+
+bool mi::get_easy_terminal_room() {
+    return get_general_config_enum_value<mi::EasyTerminalRoom>(mi::configkeys::general::easy_terminal_room) == mi::EasyTerminalRoom::On;
 }
 
 float mi::get_analog_camera_speed() {
