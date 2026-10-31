@@ -1,5 +1,5 @@
 // Widescreen fixes that need extra draw commands in the game's display list (RT64 extended GBI): black bars outside
-// the original 4:3 frame in scripted scenes, and beside the IMF handheld's bezel.
+// the original 4:3 frame in scripted scenes, beside the IMF handheld's bezel and around the sniper scope.
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -84,6 +84,9 @@ namespace {
     bool bezel_this_frame = false;
     bool bezel_last_frame = false;
 
+    // The sniper scope (Waterloo Station, Mainland) was drawn in this frame, by the player or a scripted shot.
+    bool sniper_this_frame = false;
+
     // Width / height of the area RT64 renders the 3D scene into, or 0 if it doesn't expand past 4:3.
     float expanded_aspect() {
         const ultramodern::renderer::GraphicsConfig& config = ultramodern::renderer::get_graphics_config();
@@ -120,15 +123,24 @@ extern "C" void mi_widescreen_image_draw(uint8_t* rdram, uint32_t gfx_ptr_addr, 
 // that were never meant to be seen). In Fill mode the camera already shows only the original left-right view.
 // Returns the new end.
 extern "C" uint32_t mi_widescreen_frame_end(uint8_t* rdram, uint32_t gfx_end) {
-    bool bars = mi::level_loop_is_scene() && !scene_fill_active();
+    bool bars = (mi::level_loop_is_scene() && !scene_fill_active()) || sniper_this_frame;
     bezel_last_frame = bezel_this_frame;
     bezel_this_frame = false;
+    sniper_this_frame = false;
     if (!bars) {
         return gfx_end;
     }
 
     uint32_t* start = ram_u32_ptr(rdram, gfx_end);
     return gfx_end + uint32_t(write_side_bars(start) - start) * sizeof(uint32_t);
+}
+
+// Hook at the start of Sniper_DrawScope, which draws the sniper scope's mask (image 0xA8, a quarter circle drawn four
+// times over the 4:3 frame) and crosshair whenever the scope is up, both when the player aims and in scripted shots
+// such as Luther's at Waterloo Station. The expanded view would show the scene past the mask, so the frame gets the
+// bars too.
+extern "C" void mi_widescreen_sniper_frame() {
+    sniper_this_frame = true;
 }
 
 // Hook at the start of guPerspectiveF / guPerspective(m, perspNorm, fovy, aspect, ...): $a2 holds fovy (degrees) as

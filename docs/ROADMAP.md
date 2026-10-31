@@ -37,7 +37,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       bars, so the unmodelled parts of the sets outside the original frame stay hidden; the IMF handheld's bezel gets the
       same bars wherever it is drawn. Gameplay keeps the expanded view. Verified on the Ice Hit intro. Graphics > Cutscene
       Framing "Fill" instead narrows the scene camera's vertical field of view so the expanded view keeps the original
-      horizontal framing (top and bottom trimmed); handheld scenes stay 4:3
+      horizontal framing (top and bottom trimmed); handheld scenes stay 4:3. The sniper scope (Waterloo Station,
+      Mainland) gets the same bars, both when the player aims and in scripted shots
 - [x] Scripted scenes run at 25 fps whatever the frame rate setting: their scripts time voice lines in frames, so at
       60 fps "Good luck, Jim" started before Phelps' briefing finished
 - [ ] Ultrawide polish (culling at extreme aspect ratios not checked)

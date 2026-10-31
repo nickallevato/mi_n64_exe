@@ -59,6 +59,9 @@ Object_UpdateAll = 0x800020E8;
 Input_GetStick = 0x8006E480;
 // Sniper scope control (Waterloo Station, Mainland): reads the stick and pans the scope; part of the camera update.
 Camera_SniperControl = 0x80015048;
+// Draws the sniper scope overlay whenever the scope is up (player-controlled or scripted): crosshair ticks, then the
+// mask, image 0xA8 (a quarter circle), drawn into each 160x120 quadrant by func_80064918.
+Sniper_DrawScope = 0x8003AF08;
 // Script command handler: enters the special aim state (player flag 0x100000) and resets the aim variables.
 Player_EnterScriptedAim = 0x8003D844;
 // Moves an object for this frame (called from Object_UpdateAll): root motion from its model's animations
