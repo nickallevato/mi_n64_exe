@@ -117,16 +117,26 @@ extern "C" void mi_audio_clamp_frame_samples(uint8_t* rdram, uint32_t audio_info
 }
 
 // Collision bounds null check (bug fix). Objects of type 1 update their collision bounds through obj+0x4 whenever they
-// move or turn, and that pointer can be null for an object that's just been destroyed: shooting a sea mine on Gunboat
-// read through it and crashed. Skip the update for a pointer outside RDRAM.
-extern "C" int mi_collision_bounds_valid(uint32_t bounds) {
+// move or turn, then follow it to an attached object (+0xAC). That pointer was invalid for a destroyed sea mine on
+// Gunboat, and reading through it crashed. Skip the bounds update for a pointer outside RDRAM, and read the attached
+// object from an always-zero word above the game's 8 MB instead, so it reads as none.
+static bool collision_pointer_valid(uint32_t bounds) {
     if (bounds >= 0x80000000u && bounds < 0x80800000u) {
-        return 1;
+        return true;
     }
     static bool reported = false;
     if (!reported) {
         reported = true;
-        std::fprintf(stderr, "Collision: skipped a bounds update through an invalid pointer (0x%08X)\n", bounds);
+        std::fprintf(stderr, "Collision: ignored an invalid bounds pointer (0x%08X)\n", bounds);
     }
-    return 0;
+    return false;
+}
+
+extern "C" int mi_collision_bounds_valid(uint32_t bounds) {
+    return collision_pointer_valid(bounds) ? 1 : 0;
+}
+
+extern "C" uint32_t mi_collision_bounds_or_empty(uint32_t bounds) {
+    // RDRAM above the game's 8 MB (0x80800000) is never written, so +0xAC there reads as 0.
+    return collision_pointer_valid(bounds) ? bounds : 0x80800000u;
 }
