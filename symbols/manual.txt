@@ -62,6 +62,9 @@ Camera_SniperControl = 0x80015048;
 // Draws the sniper scope overlay whenever the scope is up (player-controlled or scripted): crosshair ticks, then the
 // mask, image 0xA8 (a quarter circle), drawn into each 160x120 quadrant by func_80064918.
 Sniper_DrawScope = 0x8003AF08;
+// Screen_DrawFade(Gfx** gfx): steps the screen fade (alpha D_80093CC0, per-frame step D_80093CC4) and draws it as a
+// black 4:3 rectangle (func_80056300) while the alpha is above 0.
+Screen_DrawFade = 0x800332D4;
 // Script command handler: enters the special aim state (player flag 0x100000) and resets the aim variables.
 Player_EnterScriptedAim = 0x8003D844;
 // Moves an object for this frame (called from Object_UpdateAll): root motion from its model's animations

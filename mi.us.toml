@@ -88,6 +88,18 @@ func = "Sniper_DrawScope"
 before_vram = 0x8003AF08
 text = "{ void mi_widescreen_sniper_frame(void); mi_widescreen_sniper_frame(); }"
 
+# Widescreen: the screen fade (fade to/from black, e.g. behind "THE END") is a 4:3 rectangle, so the expanded view showed
+# the scene beside it. Stretch it to the screen edges.
+[[patches.hook]]
+func = "Screen_DrawFade"
+before_vram = 0x800333E8
+text = "{ void mi_widescreen_fade_begin(uint8_t*, uint32_t); mi_widescreen_fade_begin(rdram, (uint32_t)ctx->r4); }"
+
+[[patches.hook]]
+func = "Screen_DrawFade"
+before_vram = 0x800333F0
+text = "{ void mi_widescreen_fade_end(uint8_t*); mi_widescreen_fade_end(rdram); }"
+
 # Widescreen "Fill" cutscene framing: narrow the scene camera's vertical field of view ($a2 = fovy float bits). The main
 # camera uses guPerspectiveF; guPerspective has its own caller.
 [[patches.hook]]

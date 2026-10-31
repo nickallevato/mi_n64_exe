@@ -30,6 +30,7 @@ namespace {
     constexpr uint32_t rt64_hook_op_disable = 0x2;
     constexpr uint32_t rt64_extended_opcode = 0x64;  // Unused by F3DEX.
     constexpr uint32_t g_ex_fillrect_v1 = 0x000003;
+    constexpr uint32_t g_ex_texrect_v1 = 0x000002;
     constexpr uint32_t g_ex_origin_left = 0x0;
     constexpr uint32_t g_ex_origin_right = 0x400;
     constexpr uint32_t g_ex_origin_none = 0x800;
@@ -50,6 +51,26 @@ namespace {
         *cmd++ = (left_origin & 0xFFF) | ((right_origin & 0xFFF) << 12);
         *cmd++ = (uint32_t(uint16_t(ulx)) << 16) | uint16_t(uly);
         *cmd++ = (uint32_t(uint16_t(lrx)) << 16) | uint16_t(lry);
+    }
+
+    void write_ex_enable(uint32_t*& cmd) {
+        *cmd++ = (rt64_hook_opcode << 24) | rt64_hook_magic;
+        *cmd++ = (rt64_hook_op_enable << 28) | rt64_extended_opcode;
+    }
+
+    void write_ex_disable(uint32_t*& cmd) {
+        *cmd++ = (rt64_hook_opcode << 24) | rt64_hook_magic;
+        *cmd++ = rt64_hook_op_disable << 28;
+    }
+
+    // RT64 G_EX_TEXRECT_V1 (10.2 fixed point, each edge relative to its origin), drawn with the current render state.
+    void write_ex_texrect(uint32_t*& cmd, uint32_t left_origin, int16_t ulx, int16_t uly, uint32_t right_origin, int16_t lrx, int16_t lry) {
+        *cmd++ = (rt64_extended_opcode << 24) | g_ex_texrect_v1;
+        *cmd++ = ((left_origin & 0xFFF) << 3) | ((right_origin & 0xFFF) << 15);
+        *cmd++ = (uint32_t(uint16_t(ulx)) << 16) | uint16_t(uly);
+        *cmd++ = (uint32_t(uint16_t(lrx)) << 16) | uint16_t(lry);
+        *cmd++ = 0;
+        *cmd++ = 0;
     }
 
     // Writes black bars from each screen edge to the 4:3 edge at cmd; returns the end. With RT64's widescreen "Expand"
@@ -161,4 +182,31 @@ extern "C" uint32_t mi_widescreen_perspective(uint32_t fovy_bits) {
     fovy = 2.0f * std::atan(std::tan(half) * scale) * 180.0f / float(M_PI);
     std::memcpy(&fovy_bits, &fovy, sizeof(fovy));
     return fovy_bits;
+}
+
+// Hooks around the screen fade's rectangle in Screen_DrawFade(Gfx** gfx): the fade (to or from black, e.g. behind
+// "THE END") covers the 4:3 frame (x 0-319), so with RT64's "Expand" the scene showed beside it. Right after it, draw
+// the same rectangle (same color and transparency, still set) from each screen edge to the 4:3 edge.
+namespace {
+    uint32_t fade_gfx_ptr_addr = 0;
+}
+
+extern "C" void mi_widescreen_fade_begin(uint8_t* rdram, uint32_t gfx_ptr_addr) {
+    (void)rdram;
+    fade_gfx_ptr_addr = gfx_ptr_addr;
+}
+
+extern "C" void mi_widescreen_fade_end(uint8_t* rdram) {
+    if (fade_gfx_ptr_addr == 0) {
+        return;
+    }
+    uint32_t* gfx_ptr = ram_u32_ptr(rdram, fade_gfx_ptr_addr);
+    fade_gfx_ptr_addr = 0;
+    uint32_t* start = ram_u32_ptr(rdram, *gfx_ptr);
+    uint32_t* cmd = start;
+    write_ex_enable(cmd);
+    write_ex_texrect(cmd, g_ex_origin_left, 0, 0, g_ex_origin_none, 0, 240 << 2);
+    write_ex_texrect(cmd, g_ex_origin_none, 320 << 2, 0, g_ex_origin_right, 320 << 2, 240 << 2);
+    write_ex_disable(cmd);
+    *gfx_ptr += uint32_t(cmd - start) * sizeof(uint32_t);
 }

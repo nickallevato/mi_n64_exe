@@ -38,7 +38,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       same bars wherever it is drawn. Gameplay keeps the expanded view. Verified on the Ice Hit intro. Graphics > Cutscene
       Framing "Fill" instead narrows the scene camera's vertical field of view so the expanded view keeps the original
       horizontal framing (top and bottom trimmed); handheld scenes stay 4:3. The sniper scope (Waterloo Station,
-      Mainland) gets the same bars, both when the player aims and in scripted shots
+      Mainland) gets the same bars, both when the player aims and in scripted shots. The screen fade (to and from black, e.g.
+      behind "THE END") covers the whole screen instead of only the 4:3 frame
 - [x] Mission scenes run at 25 fps whatever the frame rate setting: their scripts time voice lines in frames, so at
       60 fps "Good luck, Jim" started before Phelps' briefing finished. The title screen's team introduction runs at
       30 fps, the rate its pacing is made for
