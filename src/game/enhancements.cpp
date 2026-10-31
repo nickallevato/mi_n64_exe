@@ -115,3 +115,18 @@ extern "C" void mi_audio_clamp_frame_samples(uint8_t* rdram, uint32_t audio_info
         frame_samples = static_cast<int16_t>(min_samples);
     }
 }
+
+// Collision bounds null check (bug fix). Objects of type 1 update their collision bounds through obj+0x4 whenever they
+// move or turn, and that pointer can be null for an object that's just been destroyed: shooting a sea mine on Gunboat
+// read through it and crashed. Skip the update for a pointer outside RDRAM.
+extern "C" int mi_collision_bounds_valid(uint32_t bounds) {
+    if (bounds >= 0x80000000u && bounds < 0x80800000u) {
+        return 1;
+    }
+    static bool reported = false;
+    if (!reported) {
+        reported = true;
+        std::fprintf(stderr, "Collision: skipped a bounds update through an invalid pointer (0x%08X)\n", bounds);
+    }
+    return 0;
+}

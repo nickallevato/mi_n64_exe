@@ -85,6 +85,14 @@ func = "Audio_HandleFrame"
 before_vram = 0x80072774
 text = "{ void mi_audio_clamp_frame_samples(uint8_t*, uint32_t); mi_audio_clamp_frame_samples(rdram, (uint32_t)ctx->r16); }"
 
+# Collision bounds null check (src/game/enhancements.cpp): moving or turning an object updates its collision bounds
+# through obj+0x4, which can be null for an object that's just been destroyed (shooting a sea mine on Gunboat).
+# Skip the update instead of reading through the null pointer.
+[[patches.hook]]
+func = "Collision_UpdateBounds"
+before_vram = 0x80028934
+text = "{ int mi_collision_bounds_valid(uint32_t); if (!mi_collision_bounds_valid((uint32_t)ctx->r4)) { return; } }"
+
 # Mouse turning outside aim mode (src/game/mouse.cpp): applied to Ethan's yaw at the start of player control.
 [[patches.hook]]
 func = "Player_Control"
