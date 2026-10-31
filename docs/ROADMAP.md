@@ -40,8 +40,8 @@ Zelda's own frontend predates RecompFrontend and is mostly game-specific.
       horizontal framing (top and bottom trimmed); handheld scenes stay 4:3. The sniper scope (Waterloo Station,
       Mainland) gets the same bars, both when the player aims and in scripted shots
 - [x] Mission scenes run at 25 fps whatever the frame rate setting: their scripts time voice lines in frames, so at
-      60 fps "Good luck, Jim" started before Phelps' briefing finished. The title screen's team introduction keeps the
-      frame rate setting
+      60 fps "Good luck, Jim" started before Phelps' briefing finished. The title screen's team introduction runs at
+      30 fps, the rate its pacing is made for
 - [ ] Ultrawide polish (culling at extreme aspect ratios not checked)
 - [x] Analog camera: right stick turns Ethan (and the camera behind him) at a configurable rate and tilts the
       first-person view; right stick removed from the C-button defaults. General > Analog Camera (default on)

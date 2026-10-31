@@ -125,7 +125,8 @@ static void add_graphics_options(recomp::config::Config &config) {
         "Frame Rate",
         "Frame rate cap during gameplay. The game times its logic by the video clock, so "
         "<recomp-color primary>60 FPS</recomp-color> plays at normal speed. <recomp-color primary>Original</recomp-color> "
-        "matches the N64's 30 FPS cap. Mission cutscenes always run at 25 FPS, which their voice timing is made for.",
+        "matches the N64's 30 FPS cap. Mission cutscenes always run at 25 FPS, which their voice timing is made for, "
+        "and the title screen's introduction at 30 FPS.",
         frame_rate_options,
         mi::FrameRate::Fps60
     );
