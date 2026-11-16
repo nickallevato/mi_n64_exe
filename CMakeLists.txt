@@ -55,6 +55,9 @@ apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_SOURCE_DIR}/patches/deps/rt64-lookat-bounds.patch)
 # Keep game memory mapped at quit: the game's threads are never joined and crash if it's unmapped under them.
 apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime ${CMAKE_SOURCE_DIR}/patches/deps/N64ModernRuntime-keep-rdram-on-quit.patch)
+# RT64's "Framerate" option only sets how far frames are interpolated above the game's own frame rate. Name it
+# Frame Interpolation ("Original" becomes "None") and let the game add it below its own Frame Rate option.
+apply_dependency_patch(${CMAKE_SOURCE_DIR}/lib/RecompFrontend ${CMAKE_SOURCE_DIR}/patches/deps/RecompFrontend-frame-interpolation.patch)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/rt64 ${CMAKE_BINARY_DIR}/rt64)
 
