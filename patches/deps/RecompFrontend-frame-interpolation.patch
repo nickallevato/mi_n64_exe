@@ -1,0 +1,109 @@
+diff --git a/recompui/include/recompui/config.h b/recompui/include/recompui/config.h
+index 38b84f5..d99721f 100644
+--- a/recompui/include/recompui/config.h
++++ b/recompui/include/recompui/config.h
+@@ -65,6 +65,9 @@ namespace recompui {
+     
+             void update_msaa_supported(bool supported);
+             void update_refresh_rate(uint32_t refresh_rate);
++            // Adds the Frame Interpolation option (rr_option and rr_manual_value). create_graphics_tab adds it unless
++            // told not to, so a game can add it itself after its own options.
++            void add_frame_interpolation_options(recomp::config::Config &config);
+             void toggle_fullscreen();
+         }
+ 
+@@ -122,7 +125,7 @@ namespace recompui {
+         // TODO: Explain how to hide/show options
+         recomp::config::Config &create_general_tab(const GeneralTabOptions& options, const std::string &name = config::general::tab_name);
+         void create_controls_tab(const std::string &name = config::controls::tab_name);
+-        recomp::config::Config &create_graphics_tab(const std::string &name = config::graphics::tab_name);
++        recomp::config::Config &create_graphics_tab(const std::string &name = config::graphics::tab_name, bool add_frame_interpolation = true);
+         recomp::config::Config &create_sound_tab(const std::string &name = config::sound::tab_name);
+         void create_mods_tab(const std::string &name = config::mods::tab_name);
+ 
+diff --git a/recompui/src/config/ui_config_tab_graphics.cpp b/recompui/src/config/ui_config_tab_graphics.cpp
+index 4fdf81f..7d3450b 100644
+--- a/recompui/src/config/ui_config_tab_graphics.cpp
++++ b/recompui/src/config/ui_config_tab_graphics.cpp
+@@ -78,7 +78,7 @@ namespace recompui {
+         };
+ 
+         static EnumOptionVector refresh_rate_options = {
+-            {ultramodern::renderer::RefreshRate::Original, "Original"},
++            {ultramodern::renderer::RefreshRate::Original, "None"},
+             {ultramodern::renderer::RefreshRate::Display, "Display"},
+             {ultramodern::renderer::RefreshRate::Manual, "Manual"},
+         };
+@@ -153,7 +153,7 @@ namespace recompui {
+ 
+         static std::string get_framerate_text(uint32_t refresh_rate) {
+             return
+-                "Sets the game's output framerate. This option does not affect gameplay."
++                "Interpolates displayed frames above the game's actual Frame Rate for visual smoothness. This option does not affect gameplay."
+                 "<br />"
+                 "<br />"
+                 "Note: If you have issues with <recomp-color primary>Display</recomp-color> mode while using an external frame limiter, use <recomp-color primary>Manual</recomp-color> mode instead and configure it to that same frame limit."
+@@ -217,7 +217,32 @@ namespace recompui {
+             apply_graphics_config();
+         }
+ 
+-        recomp::config::Config &create_graphics_tab(const std::string &name) {
++        void graphics::add_frame_interpolation_options(recomp::config::Config &config) {
++            config.add_enum_option(
++                graphics::options::rr_option,
++                "Frame Interpolation",
++                get_framerate_text(60),
++                refresh_rate_options,
++                ultramodern::renderer::RefreshRate::Display
++            );
++
++            config.add_number_option(
++                graphics::options::rr_manual_value,
++                "",
++                get_framerate_text(60),
++                20.0, 240.0, 1.0, 0, false, 60.0
++            );
++            {
++                config.add_option_hidden_dependency(
++                    graphics::options::rr_manual_value,
++                    graphics::options::rr_option,
++                    ultramodern::renderer::RefreshRate::Original,
++                    ultramodern::renderer::RefreshRate::Display
++                );
++            }
++        }
++
++        recomp::config::Config &create_graphics_tab(const std::string &name, bool add_frame_interpolation) {
+             created_graphics_config = true;
+ 
+             recomp::config::Config &config = recompui::config::create_config_tab(name, graphics::id, true);
+@@ -299,27 +324,8 @@ namespace recompui {
+                 wm_default()
+             );
+ 
+-            config.add_enum_option(
+-                graphics::options::rr_option,
+-                "Framerate",
+-                get_framerate_text(60),
+-                refresh_rate_options,
+-                ultramodern::renderer::RefreshRate::Display
+-            );
+-
+-            config.add_number_option(
+-                graphics::options::rr_manual_value,
+-                "",
+-                get_framerate_text(60),
+-                20.0, 240.0, 1.0, 0, false, 60.0
+-            );
+-            {
+-                config.add_option_hidden_dependency(
+-                    graphics::options::rr_manual_value,
+-                    graphics::options::rr_option,
+-                    ultramodern::renderer::RefreshRate::Original,
+-                    ultramodern::renderer::RefreshRate::Display
+-                );
++            if (add_frame_interpolation) {
++                graphics::add_frame_interpolation_options(config);
+             }
+ 
+             config.add_enum_option(

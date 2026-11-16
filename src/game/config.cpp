@@ -129,6 +129,9 @@ static void add_graphics_options(recomp::config::Config &config) {
         frame_rate_options,
         mi::FrameRate::Fps60
     );
+
+    // RT64's interpolation setting, placed right below the game's own Frame Rate.
+    recompui::config::graphics::add_frame_interpolation_options(config);
 }
 
 template <typename T = uint32_t>
@@ -251,7 +254,7 @@ void mi::init_config() {
     auto &general_config = recompui::config::create_general_tab(general_options);
     add_general_options(general_config);
 
-    auto &graphics_config = recompui::config::create_graphics_tab();
+    auto &graphics_config = recompui::config::create_graphics_tab(recompui::config::graphics::tab_name, false);
     add_graphics_options(graphics_config);
 
     set_control_defaults();
